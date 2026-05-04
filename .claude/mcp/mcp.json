@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "flutter-skill": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-flutter-skill",
+        "server"
+      ]
+    }
+  }
+}

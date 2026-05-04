@@ -1,0 +1,62 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ssl_cli help:*)",
+      "Bash(ssl_cli create:*)",
+      "Bash(ssl_cli module:*)",
+      "Bash(ssl_cli generate:*)",
+      "Bash(ssl_cli build:*)",
+      "Bash(autosafe:*)",
+      "Bash(flutter --version)",
+      "Bash(flutter create:*)",
+      "Bash(flutter pub:*)",
+      "Bash(dart pub:*)",
+      "Bash(dart run build_runner:*)",
+      "Bash(sh .claude/scripts/setup_secrets.sh)",
+      "Bash(python3:*)"
+    ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash .claude/hooks/pre_bash_git_guard.sh"
+          }
+        ]
+      },
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash .claude/hooks/pre_edit_guard.sh"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash .claude/hooks/post_write.sh"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash .claude/hooks/on_stop.sh"
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -13,7 +13,19 @@
       "Bash(dart pub:*)",
       "Bash(dart run build_runner:*)",
       "Bash(sh .claude/scripts/setup_secrets.sh)",
-      "Bash(python3:*)"
+      "Bash(python3:*)",
+      "Bash(bash *)",
+      "mcp__flutter-skill__connect_app",
+      "mcp__flutter-skill__screenshot",
+      "mcp__flutter-skill__get_current_route",
+      "mcp__flutter-skill__get_widget_tree",
+      "mcp__flutter-skill__get_errors",
+      "mcp__flutter-skill__inspect",
+      "mcp__flutter-skill__tap",
+      "mcp__flutter-skill__find_by_type",
+      "mcp__flutter-skill__swipe",
+      "mcp__flutter-skill__get_text_content",
+      "mcp__flutter-skill__get_logs"
     ]
   },
   "hooks": {

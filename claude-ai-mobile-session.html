@@ -1,0 +1,977 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Agentic AI Engineering for Flutter — SSL Wireless Mobile Team</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg:       #080b14;
+  --surface:  #0f1422;
+  --surface2: #161d2f;
+  --border:   #1e2a42;
+  --text:     #e2e8f0;
+  --dim:      #64748b;
+  --accent:   #f97316;
+  --blue:     #3b82f6;
+  --green:    #22c55e;
+  --purple:   #a855f7;
+  --cyan:     #06b6d4;
+  --red:      #ef4444;
+  --yellow:   #eab308;
+  --mono:     'JetBrains Mono', monospace;
+  --sans:     'Inter', sans-serif;
+}
+html, body { width:100%; height:100%; background:var(--bg); color:var(--text); font-family:var(--sans); overflow:hidden; }
+
+/* ── Deck & Slides ── */
+.deck { width:100%; height:100vh; position:relative; }
+.slide {
+  position:absolute; inset:0;
+  display:flex; flex-direction:column;
+  justify-content:center; align-items:center;
+  padding:52px 72px;
+  opacity:0; pointer-events:none;
+  transform:translateX(60px);
+  transition:opacity .4s ease, transform .4s ease;
+}
+.slide.active  { opacity:1; pointer-events:all; transform:translateX(0); }
+.slide.exit    { opacity:0; transform:translateX(-60px); }
+
+/* ── Layout ── */
+.two-col   { display:grid; grid-template-columns:1fr 1fr; gap:40px; width:100%; align-items:start; }
+.three-col { display:grid; grid-template-columns:1fr 1fr 1fr; gap:22px; width:100%; }
+.four-col  { display:grid; grid-template-columns:1fr 1fr 1fr 1fr; gap:18px; width:100%; }
+.full      { width:100%; }
+.center    { text-align:center; }
+
+/* ── Type ── */
+.tag { font-size:11px; font-family:var(--mono); letter-spacing:.15em; text-transform:uppercase; color:var(--accent); margin-bottom:12px; display:block; }
+h1  { font-size:50px; font-weight:800; line-height:1.1; letter-spacing:-.02em; }
+h2  { font-size:32px; font-weight:700; line-height:1.2; }
+h3  { font-size:17px; font-weight:600; }
+p   { font-size:15px; line-height:1.75; color:var(--dim); }
+.lead { font-size:17px; color:var(--dim); max-width:640px; text-align:center; margin-top:14px; line-height:1.7; }
+
+.hi  { color:var(--accent); }
+.bl  { color:var(--blue); }
+.gr  { color:var(--green); }
+.pu  { color:var(--purple); }
+.cy  { color:var(--cyan); }
+.re  { color:var(--red); }
+.ye  { color:var(--yellow); }
+
+/* ── Cards ── */
+.card { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:20px 24px; }
+.card h3 { margin-bottom:8px; }
+.card p  { font-size:14px; }
+.ci { width:36px; height:36px; border-radius:9px; display:flex; align-items:center; justify-content:center; font-size:18px; margin-bottom:12px; }
+.ci-o { background:rgba(249,115,22,.15); }
+.ci-b { background:rgba(59,130,246,.15); }
+.ci-g { background:rgba(34,197,94,.15); }
+.ci-p { background:rgba(168,85,247,.15); }
+.ci-c { background:rgba(6,182,212,.15); }
+.ci-y { background:rgba(234,179,8,.15); }
+
+/* ── Pills ── */
+.pill { display:inline-block; padding:2px 10px; border-radius:999px; font-size:11px; font-family:var(--mono); border:1px solid; }
+.p-o { color:var(--accent);  border-color:rgba(249,115,22,.4); background:rgba(249,115,22,.08); }
+.p-b { color:var(--blue);    border-color:rgba(59,130,246,.4);  background:rgba(59,130,246,.08); }
+.p-g { color:var(--green);   border-color:rgba(34,197,94,.4);   background:rgba(34,197,94,.08); }
+.p-p { color:var(--purple);  border-color:rgba(168,85,247,.4);  background:rgba(168,85,247,.08); }
+.p-c { color:var(--cyan);    border-color:rgba(6,182,212,.4);   background:rgba(6,182,212,.08); }
+.p-y { color:var(--yellow);  border-color:rgba(234,179,8,.4);   background:rgba(234,179,8,.08); }
+.p-r { color:var(--red);     border-color:rgba(239,68,68,.4);   background:rgba(239,68,68,.08); }
+
+/* ── Code ── */
+.cb { background:#0d1117; border:1px solid var(--border); border-radius:10px; overflow:hidden; font-family:var(--mono); font-size:12.5px; line-height:1.65; }
+.cb-bar { background:var(--surface2); border-bottom:1px solid var(--border); padding:7px 14px; font-size:11px; color:var(--dim); display:flex; align-items:center; gap:7px; }
+.d { width:9px; height:9px; border-radius:50%; }
+.dr{background:#ff5f57;} .dy{background:#febc2e;} .dg{background:#28c840;}
+.cb-body { padding:14px 18px; overflow-y:auto; max-height:340px; }
+pre { white-space:pre; }
+/* syntax */
+.kw{color:#c792ea;} .fn{color:#82aaff;} .str{color:#c3e88d;} .cm{color:#546e7a;font-style:italic;} .nu{color:#f78c6c;} .cl{color:#ffcb6b;} .de{color:#89ddff;} .ty{color:#06b6d4;}
+
+/* ── Flow ── */
+.flow { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+.fbox { background:var(--surface2); border:1px solid var(--border); border-radius:8px; padding:7px 14px; font-size:13px; font-family:var(--mono); white-space:nowrap; }
+.arr  { color:var(--dim); font-size:16px; }
+
+/* ── Lists ── */
+.cl-list { list-style:none; }
+.cl-list li { display:flex; align-items:flex-start; gap:9px; font-size:14px; line-height:1.6; color:var(--dim); margin-bottom:10px; }
+.cl-list li::before { content:'→'; color:var(--accent); font-family:var(--mono); flex-shrink:0; margin-top:1px; }
+
+/* ── Divider ── */
+.div { width:42px; height:3px; background:var(--accent); border-radius:2px; margin:12px 0; }
+
+/* ── Agenda ── */
+.ag-item { display:flex; align-items:center; gap:18px; padding:14px 20px; background:var(--surface); border:1px solid var(--border); border-radius:10px; margin-bottom:10px; }
+.ag-num  { font-family:var(--mono); font-size:20px; font-weight:700; color:var(--accent); width:32px; flex-shrink:0; }
+.ag-lbl  { font-size:15px; font-weight:600; }
+.ag-desc { font-size:12px; color:var(--dim); margin-top:2px; }
+
+/* ── Comparison Table ── */
+.cmp-table { width:100%; border-collapse:collapse; border-radius:12px; overflow:hidden; }
+.cmp-table th { background:var(--surface2); padding:10px 16px; font-size:11px; font-family:var(--mono); letter-spacing:.08em; text-transform:uppercase; color:var(--dim); text-align:left; border-bottom:2px solid var(--border); }
+.cmp-table td { padding:12px 16px; font-size:13px; border-bottom:1px solid var(--border); vertical-align:top; }
+.cmp-table tr:last-child td { border-bottom:none; }
+.cmp-table tr:nth-child(even) td { background:rgba(255,255,255,.02); }
+.cmp-table td:first-child { font-weight:700; color:var(--text); font-size:12px; }
+
+/* ── Diagram box ── */
+.dbox { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:24px; }
+.node { border-radius:10px; padding:10px 18px; font-family:var(--mono); font-size:13px; text-align:center; font-weight:600; }
+
+/* ── Nav ── */
+#nav { position:fixed; bottom:24px; left:50%; transform:translateX(-50%); display:flex; align-items:center; gap:10px; z-index:100; }
+.nb  { background:var(--surface2); border:1px solid var(--border); color:var(--text); padding:7px 16px; border-radius:8px; cursor:pointer; font-size:13px; font-family:var(--sans); transition:background .2s, border-color .2s; }
+.nb:hover { background:var(--surface); border-color:var(--accent); }
+.nb:disabled { opacity:.35; cursor:default; }
+#ctr { font-family:var(--mono); font-size:12px; color:var(--dim); min-width:56px; text-align:center; }
+#bar { position:fixed; top:0; left:0; height:3px; background:var(--accent); border-radius:0 2px 2px 0; transition:width .4s ease; z-index:100; }
+.wm  { position:fixed; bottom:24px; right:32px; font-family:var(--mono); font-size:10px; color:#1e2a42; }
+
+/* Compare L/R */
+.cmp { display:grid; grid-template-columns:1fr 1fr; gap:2px; border-radius:12px; overflow:hidden; }
+.c-l { padding:20px; background:rgba(239,68,68,.08); border:1px solid rgba(239,68,68,.2); border-radius:10px 0 0 10px; }
+.c-r { padding:20px; background:rgba(34,197,94,.08);  border:1px solid rgba(34,197,94,.2);  border-radius:0 10px 10px 0; }
+.c-h { font-size:12px; font-weight:700; letter-spacing:.08em; margin-bottom:12px; font-family:var(--mono); }
+.c-l .c-h { color:var(--red); }
+.c-r .c-h { color:var(--green); }
+.cmp li { font-size:13px; color:var(--dim); margin-bottom:7px; list-style:none; }
+
+/* Phase box */
+.phase { background:var(--surface2); border:1px solid var(--border); border-radius:8px; padding:10px 14px; margin-bottom:8px; display:flex; align-items:flex-start; gap:12px; }
+.ph-num { font-family:var(--mono); font-size:13px; font-weight:700; color:var(--accent); flex-shrink:0; width:22px; }
+.ph-body { font-size:13px; }
+.ph-body strong { color:var(--text); display:block; margin-bottom:2px; }
+.ph-body span { color:var(--dim); font-size:12px; }
+</style>
+</head>
+<body>
+<div id="bar"></div>
+
+<div class="deck" id="deck">
+
+<!-- ═══ S1 — COVER ═══ -->
+<div class="slide active" id="s1">
+  <div class="center" style="max-width:700px">
+    <span class="tag">SSL Wireless · Mobile Team · Internal Session</span>
+    <h1>Agentic AI<br><span class="hi">Engineering</span><br>for Flutter</h1>
+    <p class="lead">MCP &nbsp;·&nbsp; Hooks &nbsp;·&nbsp; Skills &nbsp;·&nbsp; Agents &nbsp;·&nbsp; Sub-Agents<br>
+    <em>Real examples from our own Flutter orchestration setup</em></p>
+    <div style="margin-top:32px; background:var(--surface); border:1px solid var(--border); border-radius:999px; padding:10px 24px; display:inline-flex; align-items:center; gap:10px; font-size:14px; color:var(--dim)">
+      <span>👤</span> <strong style="color:var(--text)">Abu Sayed Chowdhury</strong> &nbsp;— Senior Software Engineer &nbsp;|&nbsp;
+      <a href="https://github.com/AscEmon/flutter-ai-orchestration" style="color:var(--accent); text-decoration:none; font-family:var(--mono); font-size:12px">github.com/AscEmon/flutter-ai-orchestration</a>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ S2 — AGENDA ═══ -->
+<div class="slide" id="s2">
+  <div class="full" style="max-width:700px">
+    <span class="tag">What we'll cover</span>
+    <h2 style="margin-bottom:22px">Session <span class="hi">Agenda</span></h2>
+    <div class="ag-item"><div class="ag-num">01</div><div><div class="ag-lbl">Claude — Beyond a Chatbot</div><div class="ag-desc">From answering questions to executing goals autonomously</div></div></div>
+    <div class="ag-item"><div class="ag-num">02</div><div><div class="ag-lbl">MCP — Model Context Protocol</div><div class="ag-desc">Connect Claude to live Flutter app via <code style="color:var(--cyan)">flutter-skill</code></div></div></div>
+    <div class="ag-item"><div class="ag-num">03</div><div><div class="ag-lbl">Hooks — Security Guardrails</div><div class="ag-desc">4 real hooks protecting our codebase from secret leaks</div></div></div>
+    <div class="ag-item"><div class="ag-num">04</div><div><div class="ag-lbl">Skills — Reusable AI Protocols</div><div class="ag-desc">Our <code style="color:var(--cyan)">/qa_test</code> skill: Claude acting as Senior QA Engineer</div></div></div>
+    <div class="ag-item"><div class="ag-num">05</div><div><div class="ag-lbl">MCP vs Hooks vs Skills vs Agents</div><div class="ag-desc">The key comparison — what each one does and when to use it</div></div></div>
+    <div class="ag-item"><div class="ag-num">06</div><div><div class="ag-lbl">Agents &amp; Sub-Agents</div><div class="ag-desc">Simple real-life Flutter examples + how to add to our orchestration</div></div></div>
+  </div>
+</div>
+
+<!-- ═══ S3 — CLAUDE NOT A CHATBOT ═══ -->
+<div class="slide" id="s3">
+  <div class="two-col">
+    <div>
+      <span class="tag">01 — Introduction</span>
+      <h2>Claude is <span class="hi">not</span> just a chatbot</h2>
+      <div class="div"></div>
+      <p style="margin-bottom:18px">Most people use AI like Google — type a question, get a text answer. But Claude can <strong style="color:var(--text)">reason, plan, and take real actions</strong> across many steps.</p>
+      <div class="cmp" style="margin-top:16px">
+        <div class="c-l">
+          <div class="c-h">❌ OLD MODEL</div>
+          <ul>
+            <li>Type prompt → get text</li>
+            <li>Copy-paste manually</li>
+            <li>One shot, no memory</li>
+            <li>You do all the work</li>
+          </ul>
+        </div>
+        <div class="c-r">
+          <div class="c-h">✅ AGENTIC MODEL</div>
+          <ul>
+            <li>Give a goal → Claude executes</li>
+            <li>Reads files, writes code, runs CLI</li>
+            <li>Multi-step loops until done</li>
+            <li>Claude does the work</li>
+          </ul>
+        </div>
+      </div>
+      <div style="margin-top:18px; padding:12px 16px; background:var(--surface2); border-radius:8px; border-left:3px solid var(--accent); font-size:13px; color:var(--dim)">
+        <strong style="color:var(--accent)">Our setup:</strong> CLAUDE.md + AGENTS.md give Claude the <em>rules</em>. Hooks give it <em>guardrails</em>. MCP gives it <em>eyes on your running app</em>. Skills give it <em>repeatable workflows</em>.
+      </div>
+    </div>
+    <div>
+      <div class="cb">
+        <div class="cb-bar"><div class="d dr"></div><div class="d dy"></div><div class="d dg"></div> the-shift.txt</div>
+        <div class="cb-body">
+<pre>
+<span class="cm"># Regular Chatbot</span>
+User → "What is Clean Architecture?"
+  ↓
+AI  → "Clean Architecture is..."
+  ↓
+Done. User still writes the code.
+
+
+<span class="cm"># Claude as an Agent (our setup)</span>
+User → "Add payment history feature"
+  ↓
+Claude reads CLAUDE.md → knows rules
+  ↓
+Claude runs: <span class="str">ssl_cli create module:payment_history</span>
+  ↓
+pre_edit_guard.sh → checks safety
+  ↓
+Claude writes: entity → usecase
+             → model → repository
+             → provider → page
+  ↓
+Claude runs: <span class="str">dart run build_runner build</span>
+  ↓
+Developer runs: <span class="str">/qa_test</span>
+  ↓
+Claude tests on real device ✓
+  ↓
+<span class="str">Feature complete. No copy-paste.</span>
+</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ S4 — MCP CONCEPT ═══ -->
+<div class="slide" id="s4">
+  <div class="full" style="max-width:900px">
+    <span class="tag">02 — MCP</span>
+    <h2>Model Context Protocol — <span class="hi">Flutter-Skill</span></h2>
+    <div class="div"></div>
+    <p style="margin-bottom:22px; max-width:660px">MCP is a standard that lets Claude connect to external tools. In our setup, we use <span class="pill p-o">flutter-skill</span> — an MCP server that connects Claude directly to your <strong style="color:var(--text)">running Flutter app</strong> on a real device.</p>
+
+    <div class="two-col">
+      <div>
+        <div class="card" style="margin-bottom:14px">
+          <div class="ci ci-o">🔌</div>
+          <h3 class="hi">What flutter-skill enables</h3>
+          <ul class="cl-list" style="margin-top:10px">
+            <li><strong style="color:var(--text)">Live UI inspection</strong> — Claude sees every widget on screen</li>
+            <li><strong style="color:var(--text)">Automated interaction</strong> — tap buttons, type text, scroll lists</li>
+            <li><strong style="color:var(--text)">Real device QA</strong> — test on your actual phone, not simulator</li>
+            <li><strong style="color:var(--text)">VM Service link</strong> — connects via Flutter's Dart VM URL</li>
+          </ul>
+        </div>
+        <div class="card">
+          <div class="ci ci-b">⚙️</div>
+          <h3 class="bl">How it's discovered</h3>
+          <p style="font-size:13px; margin-top:6px"><code style="color:var(--cyan)">.mcp.json</code> at project root — Claude Code auto-loads it on every session. No manual setup after first install.</p>
+        </div>
+      </div>
+      <div>
+        <div class="cb">
+          <div class="cb-bar"><div class="d dr"></div><div class="d dy"></div><div class="d dg"></div> .mcp.json (our real config)</div>
+          <div class="cb-body">
+<pre>
+{
+  <span class="str">"mcpServers"</span>: {
+    <span class="str">"flutter-skill"</span>: {
+      <span class="str">"command"</span>: <span class="str">"npx"</span>,
+      <span class="str">"args"</span>: [
+        <span class="str">"-y"</span>,
+        <span class="str">"@modelcontextprotocol/server-flutter-skill"</span>,
+        <span class="str">"server"</span>
+      ]
+    }
+  }
+}
+</pre>
+          </div>
+        </div>
+
+        <div class="flow" style="margin-top:14px; justify-content:center">
+          <div class="fbox" style="color:var(--accent)">Claude Code</div>
+          <div class="arr">→</div>
+          <div class="fbox" style="color:var(--cyan)">flutter-skill MCP</div>
+          <div class="arr">→</div>
+          <div class="fbox" style="color:var(--green)">Dart VM Service</div>
+          <div class="arr">→</div>
+          <div class="fbox" style="color:var(--purple)">Real Device 📱</div>
+        </div>
+        <p style="font-size:12px; color:var(--dim); margin-top:10px; text-align:center">MCP changes require an IDE restart to take effect</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ S5 — HOOKS CONCEPT ═══ -->
+<div class="slide" id="s5">
+  <div class="full" style="max-width:940px">
+    <span class="tag">03 — Hooks · Our 4 Real Guards</span>
+    <h2>Hooks — <span class="hi">Security Guardrails</span> for Claude</h2>
+    <div class="div"></div>
+    <p style="margin-bottom:18px; max-width:680px">Hooks intercept Claude's actions before or after they run. Think of them as middleware — like Flutter's <code style="color:var(--cyan)">NavigatorObserver</code> but for AI tool calls. Our setup uses 4 hooks that run automatically on every session.</p>
+
+    <div style="background:var(--surface); border:1px solid var(--border); border-radius:12px; overflow:hidden; width:100%">
+      <div style="display:grid; grid-template-columns:130px 140px 210px 1fr; background:var(--surface2); border-bottom:1px solid var(--border); padding:9px 18px; font-family:var(--mono); font-size:10px; color:var(--dim); letter-spacing:.06em; text-transform:uppercase">
+        <div>Event</div><div>Matcher</div><div>Script</div><div>Purpose</div>
+      </div>
+      <div style="display:grid; grid-template-columns:130px 140px 210px 1fr; padding:12px 18px; border-bottom:1px solid rgba(30,42,66,.6); align-items:center">
+        <div><span class="pill p-o">PreToolUse</span></div>
+        <div style="font-family:var(--mono); font-size:12px; color:var(--cyan)">Bash</div>
+        <div style="font-family:var(--mono); font-size:12px; color:var(--text)">pre_bash_git_guard.sh</div>
+        <div style="font-size:13px; color:var(--dim)">Blocks <code style="color:var(--red)">git push</code> with leaked secrets — delegates commit to full scan</div>
+      </div>
+      <div style="display:grid; grid-template-columns:130px 140px 210px 1fr; padding:12px 18px; border-bottom:1px solid rgba(30,42,66,.6); align-items:center">
+        <div><span class="pill p-o">PreToolUse</span></div>
+        <div style="font-family:var(--mono); font-size:12px; color:var(--cyan)">Write | Edit</div>
+        <div style="font-family:var(--mono); font-size:12px; color:var(--text)">pre_edit_guard.sh</div>
+        <div style="font-size:13px; color:var(--dim)">Blocks writes to <code style="color:var(--red)">.env</code>, <code style="color:var(--red)">*.jks</code>, <code style="color:var(--red)">env.g.dart</code>, <code style="color:var(--red)">google-services.json</code></div>
+      </div>
+      <div style="display:grid; grid-template-columns:130px 140px 210px 1fr; padding:12px 18px; border-bottom:1px solid rgba(30,42,66,.6); align-items:center">
+        <div><span class="pill p-b">PostToolUse</span></div>
+        <div style="font-family:var(--mono); font-size:12px; color:var(--cyan)">Write | Edit</div>
+        <div style="font-family:var(--mono); font-size:12px; color:var(--text)">post_write.sh</div>
+        <div style="font-size:13px; color:var(--dim)">Scans every written file for leaked API keys, tokens, passwords — warns if found</div>
+      </div>
+      <div style="display:grid; grid-template-columns:130px 140px 210px 1fr; padding:12px 18px; align-items:center">
+        <div><span class="pill p-p">Stop</span></div>
+        <div style="font-family:var(--mono); font-size:12px; color:var(--cyan)">—</div>
+        <div style="font-family:var(--mono); font-size:12px; color:var(--text)">on_stop.sh</div>
+        <div style="font-size:13px; color:var(--dim)">Writes session-end timestamp to <code style="color:var(--blue)">.claude/audit.log</code> for compliance</div>
+      </div>
+    </div>
+
+    <div style="display:flex; gap:20px; margin-top:14px; flex-wrap:wrap; align-items:center">
+      <div style="display:flex; align-items:center; gap:8px; font-size:13px"><span style="font-family:var(--mono); color:var(--green); font-weight:700">exit 0</span> <span style="color:var(--dim)">= Allow</span></div>
+      <div style="display:flex; align-items:center; gap:8px; font-size:13px"><span style="font-family:var(--mono); color:var(--red); font-weight:700">exit 2</span> <span style="color:var(--dim)">= Block (Pre only)</span></div>
+      <div style="color:var(--dim); font-size:13px">Shared regex library: <span class="pill p-c" style="font-size:10px">_secret_patterns.sh</span> catches Google API keys, AWS, Stripe, GitHub tokens, Slack</div>
+      <div style="margin-left:auto; font-family:var(--mono); font-size:10px; color:var(--dim)">github.com/AscEmon/flutter-ai-orchestration</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ S6 — HOOKS CODE ═══ -->
+<div class="slide" id="s6">
+  <div class="two-col">
+    <div>
+      <span class="tag">03 — Hooks · Real Configuration</span>
+      <h2>Hooks <span class="hi">settings.json</span></h2>
+      <div class="div"></div>
+      <p style="margin-bottom:14px">All hooks live in <span class="pill p-o">.claude/settings.json</span>. Claude Code reads this on startup — no code changes needed, just config.</p>
+      <ul class="cl-list">
+        <li><code style="color:var(--cyan)">"matcher": "Bash"</code> — fires on every shell command</li>
+        <li><code style="color:var(--cyan)">"matcher": "Write|Edit"</code> — fires on every file write</li>
+        <li>Hook gets full tool input as JSON on <code style="color:var(--blue)">stdin</code></li>
+        <li><code style="color:var(--green)">exit 0</code> = allow &nbsp;|&nbsp; <code style="color:var(--red)">exit 2</code> = block</li>
+        <li>PostToolUse hooks are always informational — cannot block</li>
+      </ul>
+      <div style="margin-top:14px; padding:12px 16px; background:var(--surface2); border-radius:8px; border-left:3px solid var(--accent); font-size:13px; color:var(--dim)">
+        <strong style="color:var(--accent)">Secret patterns lib:</strong><br>
+        <code style="color:var(--cyan); font-size:11px">_secret_patterns.sh</code> is sourced by every guard hook. Add a new pattern once → all hooks get it automatically.
+      </div>
+      <div style="margin-top:10px; padding:12px 16px; background:var(--surface2); border-radius:8px; border-left:3px solid var(--blue); font-size:12px; color:var(--dim)">
+        <strong style="color:var(--blue)">Manual scans:</strong><br>
+        <code style="color:var(--cyan)">bash .claude/hooks/pre_commit.sh</code><br>
+        <code style="color:var(--cyan)">bash .claude/hooks/scan_git_history.sh --fix</code>
+      </div>
+    </div>
+    <div style="display:flex; flex-direction:column; gap:10px">
+      <div class="cb">
+        <div class="cb-bar"><div class="d dr"></div><div class="d dy"></div><div class="d dg"></div> .claude/settings.json</div>
+        <div class="cb-body" style="max-height:200px">
+<pre>
+{
+  <span class="str">"hooks"</span>: {
+    <span class="str">"PreToolUse"</span>: [
+      {
+        <span class="str">"matcher"</span>: <span class="str">"Bash"</span>,
+        <span class="str">"hooks"</span>: [{ <span class="str">"type"</span>: <span class="str">"command"</span>,
+          <span class="str">"command"</span>: <span class="str">"bash .claude/hooks/pre_bash_git_guard.sh"</span>
+        }]
+      },
+      {
+        <span class="str">"matcher"</span>: <span class="str">"Write|Edit"</span>,
+        <span class="str">"hooks"</span>: [{ <span class="str">"type"</span>: <span class="str">"command"</span>,
+          <span class="str">"command"</span>: <span class="str">"bash .claude/hooks/pre_edit_guard.sh"</span>
+        }]
+      }
+    ],
+    <span class="str">"PostToolUse"</span>: [{
+      <span class="str">"matcher"</span>: <span class="str">"Write|Edit"</span>,
+      <span class="str">"hooks"</span>: [{ <span class="str">"type"</span>: <span class="str">"command"</span>,
+        <span class="str">"command"</span>: <span class="str">"bash .claude/hooks/post_write.sh"</span>
+      }]
+    }],
+    <span class="str">"Stop"</span>: [{ <span class="str">"hooks"</span>: [{ <span class="str">"type"</span>: <span class="str">"command"</span>,
+      <span class="str">"command"</span>: <span class="str">"bash .claude/hooks/on_stop.sh"</span>
+    }]}]
+  }
+}
+</pre>
+        </div>
+      </div>
+      <div class="cb">
+        <div class="cb-bar"><div class="d dr"></div><div class="d dy"></div><div class="d dg"></div> pre_edit_guard.sh (simplified)</div>
+        <div class="cb-body" style="max-height:150px">
+<pre>
+<span class="cm">#!/bin/bash</span>
+<span class="kw">source</span> .claude/hooks/_secret_patterns.sh
+FILE=$(cat | python3 -c <span class="str">"import json,sys; print(json.load(sys.stdin).get('path',''))"</span>)
+FORBIDDEN=(<span class="str">".env"</span> <span class="str">"*.jks"</span> <span class="str">"env.g.dart"</span> <span class="str">"google-services.json"</span>)
+<span class="kw">for</span> p <span class="kw">in</span> <span class="str">"${FORBIDDEN[@]}"</span>; <span class="kw">do</span>
+  [[ <span class="str">"$FILE"</span> == *<span class="str">"$p"</span>* ]] &amp;&amp; echo <span class="str">"❌ Blocked: $FILE"</span> &amp;&amp; exit <span class="nu">2</span>
+<span class="kw">done</span>
+exit <span class="nu">0</span>
+</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ S7 — SKILLS ═══ -->
+<div class="slide" id="s7">
+  <div class="two-col">
+    <div>
+      <span class="tag">04 — Skills · Our qa_test</span>
+      <h2>Skills — <span class="hi">Reusable AI Protocols</span></h2>
+      <div class="div"></div>
+      <p style="margin-bottom:14px">A Skill is a <strong style="color:var(--text)">markdown file</strong> that defines a step-by-step protocol Claude follows when invoked. You invoke it with <span class="pill p-o">/qa_test</span> — Claude reads <code style="color:var(--cyan)">.claude/skills/qa_test.md</code> and acts as a Senior QA Engineer.</p>
+
+      <div style="margin-top:4px">
+        <div class="phase">
+          <div class="ph-num">1</div>
+          <div class="ph-body"><strong>Device Discovery &amp; Launch</strong><span>Run <code style="color:var(--cyan)">flutter devices</code> → find device ID → <code style="color:var(--cyan)">launch_for_testing.sh</code> starts app → captures Dart VM URL</span></div>
+        </div>
+        <div class="phase">
+          <div class="ph-num">2</div>
+          <div class="ph-body"><strong>Connect flutter-skill MCP</strong><span>Links Claude to the running app via VM URL → MCP now has eyes on the device</span></div>
+        </div>
+        <div class="phase">
+          <div class="ph-num">3</div>
+          <div class="ph-body"><strong>Semantic UI Mapping</strong><span><code style="color:var(--cyan)">snapshot</code> + <code style="color:var(--cyan)">inspect_interactive</code> → Claude maps every tappable &amp; typeable element</span></div>
+        </div>
+        <div class="phase">
+          <div class="ph-num">4</div>
+          <div class="ph-body"><strong>Edge-Case Test Matrix</strong><span>Empty form submit · 200+ char input · 🔥DROP TABLE; input · Keyboard overlap · Fast double-tap</span></div>
+        </div>
+        <div class="phase">
+          <div class="ph-num">5</div>
+          <div class="ph-body"><strong>Bug Report → STOP</strong><span>Structured markdown report with trigger steps → asks <em>"Which bugs should I fix?"</em> → waits for developer approval</span></div>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="cb">
+        <div class="cb-bar"><div class="d dr"></div><div class="d dy"></div><div class="d dg"></div> .claude/skills/qa_test.md (excerpt)</div>
+        <div class="cb-body" style="max-height:420px">
+<pre>
+<span class="cm"># /qa_test — Senior QA Automation Protocol</span>
+
+<span class="cm">## Phase 1: Device Discovery</span>
+1. Run `flutter devices` → identify device_id
+2. Run `bash .claude/scripts/launch_for_testing.sh {device_id}`
+   - This starts Flutter, captures VM URL
+   - VM URL saved to `.claude/tmp/vm_url.txt`
+3. Connect flutter-skill MCP to VM URL
+
+<span class="cm">## Phase 2: UI Mapping</span>
+- Call `snapshot` → get full widget tree
+- Call `inspect_interactive` → list all:
+  - Tappable elements (buttons, list tiles)
+  - Typeable elements (text fields)
+  - Scrollable containers
+
+<span class="cm">## Phase 3: Edge Case Matrix</span>
+| Test             | Action               | Check                   |
+|------------------|----------------------|-------------------------|
+| Empty submit     | Tap submit (no data) | Validation messages shown |
+| Long input       | Paste 200+ chars     | No overflow crash       |
+| Special chars    | Type `🔥DROP TABLE;` | No crash/escape issue   |
+| Keyboard overlap | Tap bottom field     | Submit button still visible |
+| Double tap       | Tap submit x2 fast   | No duplicate API calls  |
+
+<span class="cm">## Phase 4: Report &amp; STOP</span>
+Output structured bug report with:
+- Bug description
+- Exact trigger sequence
+- Suspected root cause
+
+**DO NOT write any fix yet.**
+Ask: "Which bugs should I resolve using ssl_cli architecture?"
+Only proceed after explicit developer approval.
+</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ S8 — COMPARISON TABLE ═══ -->
+<div class="slide" id="s8">
+  <div class="full" style="max-width:960px">
+    <span class="tag">05 — The Key Differentiator</span>
+    <h2>MCP vs Hooks vs Skills vs <span class="hi">Agents</span></h2>
+    <div class="div"></div>
+    <p style="margin-bottom:20px; max-width:680px">These are 4 different mechanisms that together make Claude powerful. Understanding when to use each one is the core of agentic engineering.</p>
+
+    <table class="cmp-table">
+      <thead>
+        <tr>
+          <th style="width:120px">Feature</th>
+          <th><span class="hi">MCP</span></th>
+          <th><span style="color:var(--blue)">Hooks</span></th>
+          <th><span style="color:var(--purple)">Skills</span></th>
+          <th><span style="color:var(--green)">Agents</span></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>What it is</td>
+          <td>External tool server Claude connects to</td>
+          <td>Interceptor on Claude's tool calls</td>
+          <td>Markdown protocol Claude follows on command</td>
+          <td>Claude + rules + tools pursuing a goal</td>
+        </tr>
+        <tr>
+          <td>Defined in</td>
+          <td><code style="color:var(--cyan)">.mcp.json</code></td>
+          <td><code style="color:var(--cyan)">.claude/settings.json</code></td>
+          <td><code style="color:var(--cyan)">.claude/skills/*.md</code></td>
+          <td><code style="color:var(--cyan)">CLAUDE.md + AGENTS.md</code></td>
+        </tr>
+        <tr>
+          <td>Triggered by</td>
+          <td>Claude automatically (when needed)</td>
+          <td>Every matching tool call (always)</td>
+          <td>Developer types <code style="color:var(--purple)">/qa_test</code></td>
+          <td>Developer gives a task/goal</td>
+        </tr>
+        <tr>
+          <td>Our example</td>
+          <td><span class="pill p-o" style="font-size:10px">flutter-skill</span> → sees live app</td>
+          <td><span class="pill p-b" style="font-size:10px">pre_edit_guard</span> → blocks .env writes</td>
+          <td><span class="pill p-p" style="font-size:10px">/qa_test</span> → full QA protocol</td>
+          <td><span class="pill p-g" style="font-size:10px">"Build login feature"</span></td>
+        </tr>
+        <tr>
+          <td>Can block?</td>
+          <td>No — returns data</td>
+          <td><strong style="color:var(--red)">Yes</strong> — exit 2 stops the action</td>
+          <td>No — guides Claude's behaviour</td>
+          <td>No — Claude decides next steps</td>
+        </tr>
+        <tr>
+          <td>Purpose</td>
+          <td>Extend what Claude can <em>see/do</em></td>
+          <td>Security &amp; audit guardrails</td>
+          <td>Repeatable multi-phase workflows</td>
+          <td>Autonomous goal execution</td>
+        </tr>
+        <tr>
+          <td>Analogy</td>
+          <td>Flutter plugin (adds capability)</td>
+          <td>NavigatorObserver (intercepts)</td>
+          <td>Runbook / SOP document</td>
+          <td>Senior developer with full context</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ═══ S9 — AGENTS SIMPLE ═══ -->
+<div class="slide" id="s9">
+  <div class="two-col">
+    <div>
+      <span class="tag">06 — Agents</span>
+      <h2>Agents — <span class="hi">Claude with a Goal</span></h2>
+      <div class="div"></div>
+      <p style="margin-bottom:14px">An Agent is Claude given a goal, the right context, and tools to execute. In our setup, <strong style="color:var(--text)">Claude Code IS the agent</strong>. It reads our rules and executes autonomously.</p>
+
+      <div class="card" style="margin-bottom:12px">
+        <h3 class="hi" style="margin-bottom:10px">Agent = Claude + Context + Tools</h3>
+        <div style="display:flex; gap:10px; flex-wrap:wrap">
+          <div style="text-align:center; padding:10px 14px; background:var(--surface2); border-radius:8px; flex:1">
+            <div style="font-size:18px; margin-bottom:4px">📋</div>
+            <div style="font-size:12px; color:var(--dim)">Context</div>
+            <div style="font-family:var(--mono); font-size:11px; color:var(--accent); margin-top:4px">CLAUDE.md<br>AGENTS.md<br>.claude/rules/</div>
+          </div>
+          <div style="text-align:center; padding:10px 14px; background:var(--surface2); border-radius:8px; flex:1">
+            <div style="font-size:18px; margin-bottom:4px">🛡️</div>
+            <div style="font-size:12px; color:var(--dim)">Guardrails</div>
+            <div style="font-family:var(--mono); font-size:11px; color:var(--blue); margin-top:4px">Hooks<br>settings.json<br>Security rules</div>
+          </div>
+          <div style="text-align:center; padding:10px 14px; background:var(--surface2); border-radius:8px; flex:1">
+            <div style="font-size:18px; margin-bottom:4px">🔧</div>
+            <div style="font-size:12px; color:var(--dim)">Tools</div>
+            <div style="font-family:var(--mono); font-size:11px; color:var(--green); margin-top:4px">ssl_cli<br>flutter-skill<br>build_runner</div>
+          </div>
+          <div style="text-align:center; padding:10px 14px; background:var(--surface2); border-radius:8px; flex:1">
+            <div style="font-size:18px; margin-bottom:4px">📝</div>
+            <div style="font-size:12px; color:var(--dim)">Skills</div>
+            <div style="font-family:var(--mono); font-size:11px; color:var(--purple); margin-top:4px">/qa_test<br>→ more<br>skills</div>
+          </div>
+        </div>
+      </div>
+
+      <div style="padding:12px 16px; background:var(--surface2); border-radius:8px; border-left:3px solid var(--green); font-size:13px; color:var(--dim)">
+        <strong style="color:var(--green)">Key insight:</strong> Our <code style="color:var(--cyan)">AGENTS.md</code> is only ~130 lines because it's lean — Claude loads deep detail from <code style="color:var(--cyan)">.claude/rules/</code> on demand. Context window not wasted.
+      </div>
+    </div>
+    <div>
+      <div class="cb">
+        <div class="cb-bar"><div class="d dr"></div><div class="d dy"></div><div class="d dg"></div> real-life agent loop</div>
+        <div class="cb-body">
+<pre>
+<span class="cm"># Developer says:</span>
+<span class="str">"Add a user profile feature"</span>
+
+<span class="cm">─────── AGENT LOOP ───────</span>
+
+1. Claude reads CLAUDE.md
+   → imports AGENTS.md
+   → loads ARCHITECTURE.md
+   → loads CODE_TEMPLATES.md
+
+2. Claude decides: use ssl_cli
+   → runs: <span class="str">ssl_cli create module:user_profile</span>
+   [pre_bash_git_guard checks → OK]
+
+   Creates:
+   lib/features/user_profile/
+   ├── data/models/
+   ├── data/repositories/
+   ├── domain/entities/
+   ├── domain/usecases/
+   └── presentation/
+       ├── pages/
+       ├── providers/
+       └── widgets/
+
+3. Claude writes each file
+   [pre_edit_guard: .env? No → allow]
+   [post_write: scans for secrets → clear]
+
+4. Runs: <span class="str">dart run build_runner build</span>
+
+5. Tells developer:
+   <span class="str">"Feature scaffolded. Run /qa_test?"</span>
+</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ S10 — SUB-AGENTS ═══ -->
+<div class="slide" id="s10">
+  <div class="full" style="max-width:920px">
+    <span class="tag">06 — Sub-Agents · Adding to Our Orchestration</span>
+    <h2>Sub-Agents — <span class="hi">Parallel Intelligence</span></h2>
+    <div class="div"></div>
+    <p style="margin-bottom:18px; max-width:680px">Currently our setup uses one Claude session (one agent). Sub-agents mean spawning <strong style="color:var(--text)">multiple Claude instances in parallel</strong> — each specialized. Here's how we could extend our orchestration:</p>
+
+    <div class="two-col">
+      <div>
+        <div class="dbox">
+          <div style="font-family:var(--mono); font-size:11px; color:var(--dim); margin-bottom:14px; text-align:center">CURRENT (single agent)</div>
+          <div style="background:rgba(249,115,22,.12); border:1px solid rgba(249,115,22,.35); border-radius:8px; padding:10px 16px; font-family:var(--mono); font-size:13px; color:var(--accent); text-align:center; margin-bottom:10px">🧠 Claude Code (single)</div>
+          <div style="text-align:center; color:var(--dim); font-size:12px; margin-bottom:8px">does everything sequentially</div>
+          <div class="flow" style="flex-direction:column; align-items:flex-start; gap:4px">
+            <div class="fbox" style="width:100%; color:var(--dim); font-size:12px">reads rules → scaffolds → writes code → tests</div>
+          </div>
+          <div style="margin-top:12px; font-size:12px; color:var(--dim); text-align:center">⏱ Takes longer but simple setup</div>
+        </div>
+      </div>
+
+      <div>
+        <div class="dbox">
+          <div style="font-family:var(--mono); font-size:11px; color:var(--dim); margin-bottom:14px; text-align:center">EXTENDED (orchestrator + sub-agents)</div>
+          <div style="background:rgba(249,115,22,.12); border:1px solid rgba(249,115,22,.35); border-radius:8px; padding:10px; font-family:var(--mono); font-size:12px; color:var(--accent); text-align:center; margin-bottom:10px">🧠 Orchestrator Claude<br><span style="font-size:10px; color:rgba(249,115,22,.6)">"Add payment history feature"</span></div>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:10px">
+            <div style="background:rgba(168,85,247,.1); border:1px solid rgba(168,85,247,.3); border-radius:8px; padding:8px; text-align:center; font-size:11px; font-family:var(--mono); color:var(--purple)">📋 Domain Agent<br><span style="color:var(--dim)">entity + usecase</span></div>
+            <div style="background:rgba(59,130,246,.1); border:1px solid rgba(59,130,246,.3); border-radius:8px; padding:8px; text-align:center; font-size:11px; font-family:var(--mono); color:var(--blue)">🗄️ Data Agent<br><span style="color:var(--dim)">model + repo</span></div>
+            <div style="background:rgba(34,197,94,.1); border:1px solid rgba(34,197,94,.3); border-radius:8px; padding:8px; text-align:center; font-size:11px; font-family:var(--mono); color:var(--green)">📱 UI Agent<br><span style="color:var(--dim)">page + provider</span></div>
+            <div style="background:rgba(6,182,212,.1); border:1px solid rgba(6,182,212,.3); border-radius:8px; padding:8px; text-align:center; font-size:11px; font-family:var(--mono); color:var(--cyan)">🧪 QA Agent<br><span style="color:var(--dim)">/qa_test skill</span></div>
+          </div>
+          <div style="font-size:12px; color:var(--dim); text-align:center">⚡ All run in parallel → results merged</div>
+        </div>
+      </div>
+    </div>
+
+    <div style="margin-top:16px; padding:12px 18px; background:var(--surface2); border-radius:10px; border-left:3px solid var(--yellow); display:flex; gap:16px; align-items:flex-start">
+      <span style="font-size:20px; flex-shrink:0">💡</span>
+      <div>
+        <p style="font-size:13px; color:var(--dim)"><strong style="color:var(--yellow)">Simple real-life example:</strong> Imagine your team lead says "build login". Instead of one Claude doing UI → API → tests one by one, the orchestrator splits the task: <strong style="color:var(--text)">UI agent</strong> writes the Flutter widget while <strong style="color:var(--text)">Domain agent</strong> writes the entity and use case <em>at the same time</em>. The orchestrator waits, then wires them together. Like having 4 junior devs working on the same feature simultaneously.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ S11 — REAL ORCHESTRATION ═══ -->
+<div class="slide" id="s11">
+  <div class="full" style="max-width:940px">
+    <span class="tag">Our Actual Setup · flutter-ai-orchestration</span>
+    <h2>The Full <span class="hi">Orchestration Architecture</span></h2>
+    <div class="div"></div>
+    <p style="margin-bottom:18px; max-width:680px">Here's exactly what lives in the repo — every layer and what it does. This is how Claude Code becomes an intelligent agent for Flutter development.</p>
+
+    <div style="background:var(--surface); border:1px solid var(--border); border-radius:12px; overflow:hidden">
+      <div style="display:grid; grid-template-columns:220px 1fr; border-bottom:1px solid var(--border)">
+        <div style="padding:14px 18px; background:rgba(249,115,22,.08); border-right:1px solid var(--border)">
+          <div style="font-family:var(--mono); font-size:11px; color:var(--accent); margin-bottom:4px">ENTRY POINT</div>
+          <div style="font-family:var(--mono); font-size:12px; color:var(--text)">CLAUDE.md<br>AGENTS.md</div>
+        </div>
+        <div style="padding:14px 18px; font-size:13px; color:var(--dim)">Claude's brain — knows Clean Architecture rules, Riverpod state management, coding templates, UI rules. AGENTS.md (~130 lines) is lean; Claude loads deep detail from rules/ on demand</div>
+      </div>
+      <div style="display:grid; grid-template-columns:220px 1fr; border-bottom:1px solid var(--border)">
+        <div style="padding:14px 18px; background:rgba(59,130,246,.08); border-right:1px solid var(--border)">
+          <div style="font-family:var(--mono); font-size:11px; color:var(--blue); margin-bottom:4px">RULES LAYER</div>
+          <div style="font-family:var(--mono); font-size:12px; color:var(--text)">.claude/rules/*.md</div>
+        </div>
+        <div style="padding:14px 18px; font-size:13px; color:var(--dim)"><code style="color:var(--cyan)">ARCHITECTURE.md</code> folder rules · <code style="color:var(--cyan)">CLI_WORKFLOW.md</code> ssl_cli steps · <code style="color:var(--cyan)">CODE_TEMPLATES.md</code> entity/model/usecase/provider templates · <code style="color:var(--cyan)">UI_RULES.md</code> global widgets</div>
+      </div>
+      <div style="display:grid; grid-template-columns:220px 1fr; border-bottom:1px solid var(--border)">
+        <div style="padding:14px 18px; background:rgba(239,68,68,.08); border-right:1px solid var(--border)">
+          <div style="font-family:var(--mono); font-size:11px; color:var(--red); margin-bottom:4px">SECURITY HOOKS</div>
+          <div style="font-family:var(--mono); font-size:12px; color:var(--text)">.claude/hooks/ (7 files)</div>
+        </div>
+        <div style="padding:14px 18px; font-size:13px; color:var(--dim)">pre_bash_git_guard · pre_edit_guard · post_write · on_stop · pre_commit · scan_git_history · _secret_patterns. All share one regex library. Catches Google/AWS/Stripe/GitHub tokens before they leak</div>
+      </div>
+      <div style="display:grid; grid-template-columns:220px 1fr; border-bottom:1px solid var(--border)">
+        <div style="padding:14px 18px; background:rgba(6,182,212,.08); border-right:1px solid var(--border)">
+          <div style="font-family:var(--mono); font-size:11px; color:var(--cyan); margin-bottom:4px">MCP</div>
+          <div style="font-family:var(--mono); font-size:12px; color:var(--text)">.mcp.json → flutter-skill</div>
+        </div>
+        <div style="padding:14px 18px; font-size:13px; color:var(--dim)">Connects Claude to running Flutter app via Dart VM URL. Enables live UI inspection, automated taps/types/scrolls, and real-device QA testing without any manual screen reading</div>
+      </div>
+      <div style="display:grid; grid-template-columns:220px 1fr; border-bottom:1px solid var(--border)">
+        <div style="padding:14px 18px; background:rgba(168,85,247,.08); border-right:1px solid var(--border)">
+          <div style="font-family:var(--mono); font-size:11px; color:var(--purple); margin-bottom:4px">SKILLS</div>
+          <div style="font-family:var(--mono); font-size:12px; color:var(--text)">.claude/skills/qa_test.md</div>
+        </div>
+        <div style="padding:14px 18px; font-size:13px; color:var(--dim)">Invoke with <code style="color:var(--purple)">/qa_test</code> → Claude becomes Senior QA Engineer: discovers device → launches app → connects MCP → maps UI → runs 5 edge-case tests → reports bugs → STOPS and waits for approval</div>
+      </div>
+      <div style="display:grid; grid-template-columns:220px 1fr;">
+        <div style="padding:14px 18px; background:rgba(34,197,94,.08); border-right:1px solid var(--border)">
+          <div style="font-family:var(--mono); font-size:11px; color:var(--green); margin-bottom:4px">SCRIPTS + TOOLS</div>
+          <div style="font-family:var(--mono); font-size:12px; color:var(--text)">.claude/scripts/ + ssl_cli</div>
+        </div>
+        <div style="padding:14px 18px; font-size:13px; color:var(--dim)">setup_ide.sh → supports Claude Code, Cursor, Windsurf, Copilot, Gemini, Codex/Aider. <code style="color:var(--cyan)">ssl_cli</code> scaffolds Clean Architecture folders. <code style="color:var(--cyan)">autosafe_json</code> for safe JSON parsing</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ S12 — FULL REAL EXAMPLE ═══ -->
+<div class="slide" id="s12">
+  <div class="two-col">
+    <div>
+      <span class="tag">End-to-End Real Example</span>
+      <h2>"Build a <span class="hi">Payment History</span> Screen"</h2>
+      <div class="div"></div>
+      <p style="margin-bottom:14px">One developer request. Claude does the heavy lifting — guided by our orchestration rules, guarded by hooks, and verified on a real device via MCP.</p>
+
+      <div class="phase"><div class="ph-num">1</div><div class="ph-body"><strong>Claude reads context</strong><span>CLAUDE.md → AGENTS.md → loads ARCHITECTURE.md + CODE_TEMPLATES.md</span></div></div>
+      <div class="phase"><div class="ph-num">2</div><div class="ph-body"><strong>Scaffold with ssl_cli</strong><span>→ <code style="color:var(--cyan)">ssl_cli create module:payment_history</code> → Clean Arch folders generated</span></div></div>
+      <div class="phase"><div class="ph-num">3</div><div class="ph-body"><strong>Write all layers</strong><span>Domain: entity + usecase · Data: model + repository · Presentation: provider + page + widgets. Every write passes pre_edit_guard + post_write scan</span></div></div>
+      <div class="phase"><div class="ph-num">4</div><div class="ph-body"><strong>Build & generate</strong><span>→ <code style="color:var(--cyan)">dart run build_runner build</code> → freezed models generated</span></div></div>
+      <div class="phase"><div class="ph-num">5</div><div class="ph-body"><strong>QA with /qa_test</strong><span>→ flutter-skill connects to real device → 5 edge cases tested → bug report → developer approves fixes</span></div></div>
+
+      <div style="margin-top:12px; padding:10px 14px; background:rgba(34,197,94,.08); border:1px solid rgba(34,197,94,.2); border-radius:8px; font-size:13px; color:var(--green); display:flex; align-items:center; gap:8px">
+        <span>✅</span> Complete, tested, architecture-compliant feature — zero secret leaks
+      </div>
+    </div>
+    <div>
+      <div class="cb">
+        <div class="cb-bar"><div class="d dr"></div><div class="d dy"></div><div class="d dg"></div> lib/features/payment_history/ (generated)</div>
+        <div class="cb-body">
+<pre>
+<span class="cm"># Folder structure (ssl_cli created)</span>
+lib/features/payment_history/
+├── data/
+│   ├── datasources/
+│   │   └── payment_remote_datasource.dart
+│   ├── models/
+│   │   └── payment_model.dart       <span class="cm">← autosafe_json</span>
+│   └── repositories/
+│       └── payment_repository_impl.dart
+├── domain/
+│   ├── entities/
+│   │   └── payment_entity.dart
+│   ├── repositories/
+│   │   └── payment_repository.dart
+│   └── usecases/
+│       └── get_payments_usecase.dart
+└── presentation/
+    ├── pages/
+    │   └── payment_history_page.dart
+    ├── providers/
+    │   └── payment_provider.dart    <span class="cm">← Riverpod</span>
+    └── widgets/
+        └── payment_tile_widget.dart
+
+<span class="cm"># flutter-skill MCP then sees:</span>
+<span class="kw">snapshot</span>() → {
+  "PaymentHistoryPage": {
+    "widgets": [
+      { "type": "RefreshIndicator",
+        "child": "ListView" },
+      { "type": "PaymentTileWidget",
+        "tappable": <span class="kw">true</span> }
+    ]
+  }
+}
+
+<span class="cm"># QA agent taps each, types test data,</span>
+<span class="cm"># checks for crashes, reports any bugs</span>
+</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ S13 — RECAP ═══ -->
+<div class="slide" id="s13">
+  <div class="full" style="max-width:900px">
+    <span class="tag">Summary</span>
+    <h2>The Complete <span class="hi">Agentic Picture</span></h2>
+    <div class="div"></div>
+    <div class="four-col" style="margin-top:20px">
+      <div class="card">
+        <div class="ci ci-o">🔌</div>
+        <span class="pill p-o" style="margin-bottom:8px; display:inline-block">MCP</span>
+        <h3 style="margin-bottom:6px">flutter-skill</h3>
+        <p>Claude sees and interacts with your running Flutter app on a real device via Dart VM</p>
+      </div>
+      <div class="card">
+        <div class="ci ci-b">🛡️</div>
+        <span class="pill p-b" style="margin-bottom:8px; display:inline-block">Hooks</span>
+        <h3 style="margin-bottom:6px">4 Guards</h3>
+        <p>pre_bash · pre_edit · post_write · on_stop. Blocks secret leaks, audits every session</p>
+      </div>
+      <div class="card">
+        <div class="ci ci-p">📋</div>
+        <span class="pill p-p" style="margin-bottom:8px; display:inline-block">Skills</span>
+        <h3 style="margin-bottom:6px">/qa_test</h3>
+        <p>Invoke protocol → Claude becomes Senior QA: 5 edge cases, bug report, waits for approval</p>
+      </div>
+      <div class="card">
+        <div class="ci ci-g">🤖</div>
+        <span class="pill p-g" style="margin-bottom:8px; display:inline-block">Agents</span>
+        <h3 style="margin-bottom:6px">Claude Code</h3>
+        <p>Guided by CLAUDE.md + AGENTS.md + rules. Knows your architecture, templates, and conventions</p>
+      </div>
+    </div>
+    <div style="margin-top:20px; display:grid; grid-template-columns:1fr 1fr; gap:16px">
+      <div style="padding:16px 20px; background:var(--surface); border:1px solid var(--border); border-radius:10px; font-size:13px">
+        <div style="color:var(--yellow); font-weight:700; margin-bottom:8px; font-family:var(--mono)">⚡ WHAT MAKES THIS SPECIAL</div>
+        <div style="color:var(--dim); line-height:1.8">
+          Works across all IDEs (Claude, Cursor, Windsurf, Copilot)<br>
+          Hooks are PCI-DSS friendly — no secret ever touches git<br>
+          ssl_cli enforces Clean Architecture — no shortcuts<br>
+          QA skill tests real device, not just unit tests
+        </div>
+      </div>
+      <div style="padding:16px 20px; background:var(--surface); border:1px solid var(--border); border-radius:10px; font-size:13px">
+        <div style="color:var(--cyan); font-weight:700; margin-bottom:8px; font-family:var(--mono)">🚀 NEXT STEPS</div>
+        <div style="color:var(--dim); line-height:1.8">
+          Copy the setup to your Flutter project today<br>
+          Add your own rules to <code style="color:var(--cyan)">.claude/rules/</code><br>
+          Add more skills (e.g. <code style="color:var(--cyan)">/code_review</code>, <code style="color:var(--cyan)">/feature</code>)<br>
+          Evolve to sub-agents with Claude's Agent SDK
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ S14 — Q&A ═══ -->
+<div class="slide" id="s14">
+  <div class="center" style="max-width:640px">
+    <span class="tag">Thank You</span>
+    <h1>Questions? <span class="hi">Let's Build.</span></h1>
+    <p class="lead">Try it on your current sprint feature. Drop the setup into your project and let Claude do the scaffolding while the hooks keep it safe.</p>
+    <div style="margin-top:32px; display:flex; gap:14px; justify-content:center; flex-wrap:wrap">
+      <div class="card" style="text-align:left; min-width:220px">
+        <div style="font-family:var(--mono); font-size:10px; color:var(--dim); margin-bottom:8px">OUR REPO</div>
+        <a href="https://github.com/AscEmon/flutter-ai-orchestration" style="color:var(--accent); text-decoration:none; font-family:var(--mono); font-size:12px">github.com/AscEmon/<br>flutter-ai-orchestration</a>
+      </div>
+      <div class="card" style="text-align:left; min-width:220px">
+        <div style="font-family:var(--mono); font-size:10px; color:var(--dim); margin-bottom:8px">REFERENCES</div>
+        <div style="font-size:13px"><a href="https://docs.anthropic.com" style="color:var(--blue); text-decoration:none">docs.anthropic.com</a></div>
+        <div style="font-size:13px; margin-top:4px"><a href="https://modelcontextprotocol.io" style="color:var(--blue); text-decoration:none">modelcontextprotocol.io</a></div>
+        <div style="font-size:13px; margin-top:4px"><a href="https://pub.dev/packages/flutter_skill" style="color:var(--blue); text-decoration:none">pub.dev/packages/flutter_skill</a></div>
+      </div>
+      <div class="card" style="text-align:left; min-width:220px">
+        <div style="font-family:var(--mono); font-size:10px; color:var(--dim); margin-bottom:8px">CONTACT</div>
+        <div style="font-size:14px; color:var(--text)">Abu Sayed Chowdhury</div>
+        <div style="font-size:13px; color:var(--dim); margin-top:4px">abu.sayed@sslwireless.com</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /deck -->
+
+<div id="nav">
+  <button class="nb" id="pb" onclick="go(-1)">← Prev</button>
+  <div id="ctr">1 / 14</div>
+  <button class="nb" id="nb2" onclick="go(1)">Next →</button>
+</div>
+<div class="wm">AscEmon/flutter-ai-orchestration · SSL Wireless</div>
+
+<script>
+const slides = document.querySelectorAll('.slide');
+const total = slides.length;
+let cur = 0;
+
+function go(dir) {
+  const next = Math.max(0, Math.min(total - 1, cur + dir));
+  if (next === cur) return;
+  slides[cur].classList.remove('active');
+  slides[cur].classList.add('exit');
+  const old = cur;
+  setTimeout(() => slides[old].classList.remove('exit'), 450);
+  cur = next;
+  slides[cur].classList.add('active');
+  document.getElementById('ctr').textContent = `${cur + 1} / ${total}`;
+  document.getElementById('bar').style.width = `${((cur + 1) / total) * 100}%`;
+  document.getElementById('pb').disabled = cur === 0;
+  document.getElementById('nb2').disabled = cur === total - 1;
+}
+
+document.addEventListener('keydown', e => {
+  if (['ArrowRight','ArrowDown','Space'].includes(e.key)) go(1);
+  if (['ArrowLeft','ArrowUp'].includes(e.key)) go(-1);
+  if (e.key === 'Home') { cur = 1; go(-1); }
+  if (e.key === 'End')  { cur = total - 2; go(1); }
+});
+let tx = 0;
+document.addEventListener('touchstart', e => tx = e.touches[0].clientX);
+document.addEventListener('touchend',   e => { const dx = tx - e.changedTouches[0].clientX; if (Math.abs(dx) > 50) go(dx > 0 ? 1 : -1); });
+
+// init
+document.getElementById('bar').style.width = `${(1/total)*100}%`;
+document.getElementById('pb').disabled = true;
+</script>
+</body>
+</html>

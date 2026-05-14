@@ -113,6 +113,26 @@ You'll see an interactive menu:
 
 Pick your IDE. The script generates **only** the files that IDE needs. Done.
 
+---
+
+### ⚠️ Critical Responsibility Warning
+
+**It is your responsibility to manage your real credentials.**
+
+1.  **Fill `.env`:** You MUST manually update `.env` with your real production/staging URLs and JKS credentials (password, alias, etc.). The orchestration cannot do this for you.
+2.  **Sync Secrets:** Every time you change `.env`, you **MUST** run:
+    ```bash
+    sh .claude/scripts/setup_secrets.sh
+    ```
+    This script pushes your `.env` changes into native files (`key.properties`, `Secret.xcconfig`).
+3.  **Generate Dart Secrets:** After updating `.env`, also run:
+    ```bash
+    dart run build_runner build --delete-conflicting-outputs
+    ```
+    This updates the obfuscated `env.g.dart` file.
+
+---
+
 ### 3. Customize the Rules
 
 Edit the files in `.claude/rules/` to match **your** project's architecture. The defaults are set for:

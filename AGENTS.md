@@ -30,6 +30,14 @@
 4. **Global widgets only** — never raw Flutter → `GlobalText`, `GlobalButton`, `GlobalLoader`, etc.
 5. **Never touch generated files** — `env.g.dart`, `key.properties`, `Secret.xcconfig` are auto-generated
 
+### Data → Domain mapping pattern (mandatory read)
+
+Before writing **any** model, entity, or repository:
+
+> **Read `.claude/skills/clean_architecture_pattern.md` first.**
+
+It documents the non-negotiable layering this codebase uses: nullable `*_response.dart` DTOs decoded with `SafeJson.as*`, non-nullable `*_entity.dart` value objects with **default values for every field**, and explicit field-by-field model → entity mapping inside `*_repository_impl.dart` with `?? defaultValue` fallbacks. Models **do not** extend entities. Ground-truth reference: `lib/features/homes/` in the sibling `heidelberg` project.
+
 ---
 
 ## Agent Decision Flow (Run Every Task)
@@ -103,6 +111,7 @@ Pull these files when you need full templates, patterns, or rules for a specific
 
 | Topic | File |
 |-------|------|
+| **Data → Domain mapping (autosafe_json, entity defaults, repo bridge)** | `.claude/skills/clean_architecture_pattern.md` |
 | Architecture, folder structure, naming, DI patterns | `.claude/rules/ARCHITECTURE.md` |
 | CLI usage, ssl_cli & autosafe step-by-step workflow | `.claude/rules/CLI_WORKFLOW.md` |
 | Full code templates (Entity, Model, UseCase, Provider, Page) | `.claude/rules/CODE_TEMPLATES.md` |

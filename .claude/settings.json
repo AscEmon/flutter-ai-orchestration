@@ -13,8 +13,15 @@
       "Bash(dart pub:*)",
       "Bash(dart run build_runner:*)",
       "Bash(sh .claude/scripts/setup_secrets.sh)",
-      "Bash(python3:*)",
-      "Bash(bash *)",
+      "Bash(flutter analyze:*)",
+      "Bash(flutter test:*)",
+      "Bash(flutter devices)",
+      "Bash(bash .claude/scripts/launch_for_testing.sh:*)",
+      "Bash(bash .claude/hooks/check_rules.sh)",
+      "Bash(bash .claude/hooks/pre_commit.sh)",
+      "Bash(git status:*)",
+      "Bash(git diff:*)",
+      "Bash(git log:*)",
       "mcp__flutter-skill__connect_app",
       "mcp__flutter-skill__screenshot",
       "mcp__flutter-skill__get_current_route",
@@ -26,6 +33,25 @@
       "mcp__flutter-skill__swipe",
       "mcp__flutter-skill__get_text_content",
       "mcp__flutter-skill__get_logs"
+    ],
+    "deny": [
+      "Read(./.env)",
+      "Read(./.env.*)",
+      "Read(./android/key.properties)",
+      "Read(./android/local.properties)",
+      "Read(./**/*.jks)",
+      "Read(./**/*.keystore)",
+      "Read(./**/*.p12)",
+      "Read(./**/*.pem)",
+      "Read(./**/env.g.dart)",
+      "Read(./**/Secret.xcconfig)",
+      "Read(./**/google-services.json)",
+      "Read(./**/GoogleService-Info.plist)",
+      "Bash(curl:*)",
+      "Bash(wget:*)",
+      "Bash(git push --force:*)",
+      "Bash(git push -f:*)",
+      "Bash(git reset --hard:*)"
     ]
   },
   "hooks": {
@@ -63,6 +89,11 @@
     "Stop": [
       {
         "hooks": [
+          {
+            "type": "command",
+            "command": "bash .claude/hooks/stop_gate.sh",
+            "timeout": 900
+          },
           {
             "type": "command",
             "command": "bash .claude/hooks/on_stop.sh"

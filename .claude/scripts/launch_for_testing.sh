@@ -23,8 +23,18 @@ else
 fi
 
 # Wait and extract the URL
-echo "Waiting for VM Service URL..."
+echo "Waiting for VM Service URL (timeout ${LAUNCH_TIMEOUT:-300}s)..."
+START=$(date +%s)
 while true; do
+    if grep -qE "Error: |FAILURE: Build failed|Gradle task .* failed|Could not build" .claude/tmp/flutter_run.log 2>/dev/null; then
+        echo "❌ Build failed. Last lines of .claude/tmp/flutter_run.log:"
+        tail -30 .claude/tmp/flutter_run.log
+        exit 1
+    fi
+    if [ $(( $(date +%s) - START )) -ge "${LAUNCH_TIMEOUT:-300}" ]; then
+        echo "❌ Timed out waiting for the VM Service URL. See .claude/tmp/flutter_run.log"
+        exit 1
+    fi
     URL=$(grep -o "ws://127.0.0.1:[0-9]*/ws" .claude/tmp/flutter_run.log | head -1)
     if [ ! -z "$URL" ]; then
         echo "$URL" > .claude/tmp/vm_url.txt

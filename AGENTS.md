@@ -11,7 +11,7 @@
 |---------|--------|
 | Language | Dart / Flutter (3.11+) |
 | Architecture | Clean Architecture — feature-based |
-| State | Riverpod (`flutter_riverpod` 3.x) |
+| State | **Riverpod or flutter_bloc** — chosen at `ssl_cli create`; the active one is in `.claude/rules/STATE_MANAGEMENT.md` |
 | HTTP | Dio 5.x — `response.data` is already parsed |
 | Error type | `Either<Failure, T>` via `dartz` |
 | DI | GetIt (`sl` singleton) |
@@ -36,7 +36,7 @@ Before writing **any** model, entity, or repository:
 
 > **Read `.claude/skills/clean_architecture_pattern.md` first.**
 
-It documents the non-negotiable layering this codebase uses: nullable `*_response.dart` DTOs decoded with `SafeJson.as*`, non-nullable `*_entity.dart` value objects with **default values for every field**, and explicit field-by-field model → entity mapping inside `*_repository_impl.dart` with `?? defaultValue` fallbacks. Models **do not** extend entities. Ground-truth reference: `lib/features/homes/` in the sibling `heidelberg` project.
+It documents the non-negotiable layering this codebase uses: nullable `*_response.dart` DTOs decoded with `SafeJson.as*`, non-nullable `*_entity.dart` value objects with **default values for every field**, and explicit field-by-field model → entity mapping inside `*_repository_impl.dart` with `?? defaultValue` fallbacks. Models **do not** extend entities. Ground-truth reference: the templates in that file (adapt the `Home*` example to your feature).
 
 ---
 
@@ -49,8 +49,8 @@ ssl_cli help --all       → not found? → dart pub global activate ssl_cli
   ↓
 autosafe --version       → not found? → dart pub global activate autosafe_json
   ↓
-New project?    → Yes → ssl_cli create <name>   (pattern 4 · Riverpod)
-New feature?    → Yes → ssl_cli module <name>   (pattern 3 · Riverpod)
+New project?    → Yes → ssl_cli create <name>   (pattern 4 · state mgmt 1 Riverpod / 2 Bloc)
+New feature?    → Yes → ssl_cli module <name>   (pattern 3 · SAME state mgmt as STATE_MANAGEMENT.md)
 Modified model? → Yes → autosafe /path/to/model.dart
 Added assets?   → Yes → ssl_cli generate k_assets.dart
   ↓
@@ -114,7 +114,8 @@ Pull these files when you need full templates, patterns, or rules for a specific
 | **Data → Domain mapping (autosafe_json, entity defaults, repo bridge)** | `.claude/skills/clean_architecture_pattern.md` |
 | Architecture, folder structure, naming, DI patterns | `.claude/rules/ARCHITECTURE.md` |
 | CLI usage, ssl_cli & autosafe step-by-step workflow | `.claude/rules/CLI_WORKFLOW.md` |
-| Full code templates (Entity, Model, UseCase, Provider, Page) | `.claude/rules/CODE_TEMPLATES.md` |
+| Domain templates (Repository contract, UseCase) | `.claude/rules/CODE_TEMPLATES.md` |
+| **State management** — folders, Notifier/Bloc, Page, tests | `.claude/rules/STATE_MANAGEMENT.md` |
 | UI rules, global widgets, responsive sizing | `.claude/rules/UI_RULES.md` |
 | Security rules, forbidden files, envied setup, .gitignore | `.claude/docs/SECURITY.md` |
 | QA & testing guidance | `.claude/skills/qa_test.md` |
@@ -123,15 +124,29 @@ Pull these files when you need full templates, patterns, or rules for a specific
 
 ---
 
-## Development Pipeline
+## Development Pipeline (spec → tests → code → gate loop → review → QA)
 
 ```
-Stage 1: User Prompt → Stage 2: Coding → Stage 3: Testing
+1 Spec ─► 2 Tests first ─► 3 Code ─► 4 Gate ──fail──► back to 3 (max 3 tries, then ask user)
+                                         │ pass
+                                         ▼
+                                     5 Review ──fail──► back to 3
+                                         │ pass
+                                         ▼
+                                      6 QA ─► 7 Done report
 ```
 
-- **User Prompt** → extract user demand and plan about the feature, and ask for any missing information from the user and confirm it with the user to make sure everything is correct
-- **Coding** → ssl_cli → fill logic → autosafe → register DI and create test file for each usecase and notifier
-- **Testing** → unit-test UseCases & Notifiers · widget-test components · ≥ 80% coverage- - and manual testing using flutter-skill and run the app to test the feature, if any bug found, list them and ask user what to do.
+1. **Spec** → write `docs/specs/<feature>.md` with numbered acceptance criteria (`AC-01`…, Given/When/Then), API contract, PII/compliance flags and open questions. **Stop and get the user's approval.** (Claude Code: `/spec`)
+2. **Tests first** → one test per acceptance criterion, named with its ID: `test('AC-01: ...')`. Mirror paths under `test/`. Every `*_usecase.dart`, `*_provider.dart` (Riverpod) and `*_bloc.dart` (Bloc) needs a test. (Claude Code: `test-writer` subagent)
+3. **Code** → `ssl_cli` → fill logic → `autosafe` → register DI. Fix the code to satisfy the tests — **never weaken, skip, or delete tests**, and never add `// ignore:`.
+4. **Gate** → must pass before you say "done":
+   `flutter analyze --no-fatal-infos` · `bash .claude/hooks/check_rules.sh` · `flutter test`
+   (Claude Code runs this automatically via the Stop hook and loops until green, max 3 attempts.)
+5. **Review** → check acceptance criteria, architecture, golden rules, and security (no PII/secrets in logs). (Claude Code: `reviewer` subagent)
+6. **QA** → manual run on device with flutter-skill (`/qa_test`). List bugs and ask the user what to do.
+7. **Done** → report a table of AC-ID → test → status, plus files changed.
+
+**Definition of Done:** every acceptance criterion has a passing test, the gate is green, and the review passed.
 
 ---
 

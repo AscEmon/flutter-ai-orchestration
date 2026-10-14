@@ -118,6 +118,7 @@ Whenever generating a project, the AI agent MUST verify these entries exist in `
 ```gitignore
 .env
 .env.*
+!.env.example
 android/key.properties
 android/app/release.jks
 android/app/*.jks

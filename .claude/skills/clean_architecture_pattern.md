@@ -284,43 +284,11 @@ abstract class HomeRepository {
 
 ---
 
-## Template — `*_state.dart` (presentation/providers/state)
+## Presentation layer — state, notifier/bloc, page
 
-State holds the **entity directly with a default**. UI never has to null-check the data field.
-
-```dart
-@immutable
-class HomeState extends Equatable {
-  final bool isLoading;
-  final Failure? failure;
-  final HomeEntity homeData;                              // ← entity, non-nullable
-  final bool? isHomeDataEmpty;
-
-  const HomeState({
-    this.isLoading = true,
-    this.failure,
-    this.homeData = const HomeEntity(),                   // ← entity default
-    this.isHomeDataEmpty = false,
-  });
-
-  HomeState copyWith({
-    bool? isLoading,
-    Failure? failure,
-    HomeEntity? homeData,
-    bool? isHomeDataEmpty,
-  }) {
-    return HomeState(
-      isLoading: isLoading ?? this.isLoading,
-      failure: failure,
-      homeData: homeData ?? this.homeData,
-      isHomeDataEmpty: isHomeDataEmpty,
-    );
-  }
-
-  @override
-  List<Object?> get props => [isLoading, failure, homeData, isHomeDataEmpty];
-}
-```
+The data and domain templates above are the same for every state management.
+The presentation layer depends on the project's choice (Riverpod or flutter_bloc) and lives in
+**`.claude/rules/STATE_MANAGEMENT.md`**. In both, the state carries the **entity directly** (non-nullable, with a default or inside the loaded state), so the UI never null-checks data.
 
 ---
 
@@ -350,10 +318,9 @@ When adding a new feature endpoint, work top-down:
 - [ ] **Remote datasource** (`data/datasources/*_remote_datasource.dart`) — returns the response type, `rethrow` on catch.
 - [ ] **Repository impl** (`data/repositories/*_repository_impl.dart`) — `handleException` + explicit model→entity mapping with `??` fallbacks.
 - [ ] **Use case** (`domain/usecases/*_usecase.dart`) — `implements UseCase<Entity, Params>`.
-- [ ] **State** (`presentation/providers/state/*_state.dart`) — entity with `const FooEntity()` default.
-- [ ] **Notifier** (`presentation/providers/*_provider.dart`) — Riverpod `Notifier`, calls use case, folds into state.
+- [ ] **Presentation** — state + Notifier (Riverpod) or event/state/Bloc (flutter_bloc), per `.claude/rules/STATE_MANAGEMENT.md`.
 - [ ] **DI** (`core/di/service_locator.dart`) — register datasource (lazy singleton), repo (lazy singleton), use case (factory).
 
 ---
 
-*If anything in this skill conflicts with newer guidance in `.claude/rules/` or `AGENTS.md`, ask the user before deviating. Treat the heidelberg `lib/features/homes/` implementation as the ground-truth reference.*
+*If anything in this skill conflicts with newer guidance in `.claude/rules/` or `AGENTS.md`, ask the user before deviating. Treat the `Home*` templates in this file as the ground-truth reference.*

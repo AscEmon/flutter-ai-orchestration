@@ -142,6 +142,18 @@ setup_claude() {
         ok ".claude/rules/ (auto-loaded by Claude Code)"
     fi
 
+    if [ -d "$ROOT/.claude/agents" ]; then
+        ok ".claude/agents/ (test-writer, reviewer subagents)"
+    fi
+
+    if [ -d "$ROOT/.claude/commands" ]; then
+        ok ".claude/commands/ (/spec, /feature, /qa_test)"
+    fi
+
+    if [ -f "$HOOKS_DIR/stop_gate.sh" ]; then
+        ok "Stop gate (analyze → rules → test loop, max 3 retries)"
+    fi
+
     echo ""
     echo -e "  ${DIM}Tip: Claude Code is your default. Everything is already wired.${NC}"
 }

@@ -29,7 +29,7 @@ if command -v git &>/dev/null && git rev-parse --is-inside-work-tree &>/dev/null
 
     FOUND_ISSUE=0
     for sf in "${SENSITIVE_FILES[@]}"; do
-        if echo "$TRACKED" | grep -qF "$sf"; then
+        if echo "$TRACKED" | grep -qE "(^|/)${sf//./\\.}$"; then   # exact name, not .env.example
             if [ $FOUND_ISSUE -eq 0 ]; then
                 echo ""
                 echo "  ⚠️  SESSION END — Secret file warning:"

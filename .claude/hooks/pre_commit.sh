@@ -117,7 +117,7 @@ if [ ${#MISSING_IGNORES[@]} -gt 0 ]; then
     done
     echo ""
     echo "    Auto-fix command:"
-    echo "       bash .claude/hooks/setup.sh --fix-gitignore"
+    echo "       add the entries above to .gitignore (full list: .claude/docs/SECURITY.md → .gitignore Validation)"
 else
     echo "    ✔  .gitignore looks good"
 fi

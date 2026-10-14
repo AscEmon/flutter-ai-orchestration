@@ -34,7 +34,7 @@ Then verify PATH is set:
 ssl_cli create <project_name>
 ```
 - When prompted for pattern → **select pattern `4`** (Clean Architecture)
-- When prompted for state management → **select `Riverpod`**
+- When prompted for state management → **`1` Riverpod or `2` Bloc** (must match `.claude/rules/STATE_MANAGEMENT.md`)
 
 ### Adding a New Feature Module
 
@@ -42,7 +42,7 @@ ssl_cli create <project_name>
 ssl_cli module <module_name>
 ```
 - When prompted for pattern → **select Clean Architecture pattern `3`**
-- When prompted for state management → **select `Riverpod`**
+- When prompted for state management → **`1` Riverpod or `2` Bloc** (must match `.claude/rules/STATE_MANAGEMENT.md`)
 
 ### After Adding Assets (Images / SVGs)
 
@@ -87,7 +87,7 @@ dependencies:
 ### After Every Model Change
 
 ```bash
-autosafe /path/to/your/model/{model_name}_model.dart
+autosafe /path/to/your/models/{name}_response.dart
 ```
 
 ---
@@ -99,7 +99,7 @@ Once ssl_cli generates the structure, fill in:
 - Model `fromJson` / `toJson`
 - UseCase business logic
 - Repository implementation
-- Provider state & actions
+- State + Notifier (Riverpod) or Event/State/Bloc (Bloc)
 - UI page & widgets
 
 > Only write code **inside** the generated files. Never create new folders manually.
@@ -125,11 +125,11 @@ Found? ──No──→ dart pub global activate autosafe_json → verify → c
        │
       Yes
        ↓
-Is it a new project? ──Yes──→ ssl_cli create <project_name> (pick pattern 4 + Riverpod)
+Is it a new project? ──Yes──→ ssl_cli create <project_name> (pattern 4 + 1 Riverpod / 2 Bloc)
        │                       + Verify .gitignore has all secret file entries
       No
        ↓
-Is it a new feature? ──Yes──→ ssl_cli module <module_name> (pick pattern 3 + Riverpod)
+Is it a new feature? ──Yes──→ ssl_cli module <module_name> (pattern 3 + same state mgmt)
        │
       No
        ↓

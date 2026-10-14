@@ -1,0 +1,19 @@
+# Include in .gitlab-ci.yml:  include: { local: 'ci-templates/gitlab-flutter-quality.yml' }
+# Same gate as the Claude Code Stop hook — so humans and agents pass the same bar.
+flutter-quality:
+  image: ghcr.io/cirruslabs/flutter:stable
+  stage: test
+  rules:
+    - if: '$CI_MERGE_REQUEST_IID'
+  variables:
+    GIT_DEPTH: 0
+    CHECK_RULES_BASE: origin/$CI_MERGE_REQUEST_TARGET_BRANCH_NAME
+  script:
+    - git fetch origin $CI_MERGE_REQUEST_TARGET_BRANCH_NAME
+    - flutter pub get
+    - flutter analyze --no-fatal-infos
+    - bash .claude/hooks/check_rules.sh
+    - flutter test --coverage
+  artifacts:
+    when: always
+    paths: [coverage/lcov.info]

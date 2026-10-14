@@ -1,0 +1,20 @@
+# Copy to .github/workflows/flutter-quality.yml
+# Same gate as the Claude Code Stop hook — so humans and agents pass the same bar.
+name: flutter-quality
+on: [pull_request]
+permissions:
+  contents: read
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+      - uses: subosito/flutter-action@v2
+        with: { channel: stable }
+      - run: flutter pub get
+      - run: flutter analyze --no-fatal-infos
+      - run: bash .claude/hooks/check_rules.sh
+        env:
+          CHECK_RULES_BASE: origin/${{ github.base_ref }}
+      - run: flutter test --coverage

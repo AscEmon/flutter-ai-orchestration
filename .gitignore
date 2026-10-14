@@ -19,3 +19,28 @@ GEMINI.md
 .cursor/mcp.json
 .vscode/mcp.json
 .github/copilot-instructions.md
+
+# Claude Code personal settings (never commit)
+.claude/settings.local.json
+
+# Secrets (defense in depth — this repo should never hold real ones)
+.env
+.env.*
+!.env.example
+*.env
+key.properties
+local.properties
+*.keystore
+*.jks
+google-services.json
+GoogleService-Info.plist
+secrets.dart
+api_keys.dart
+credentials.dart
+*.p12
+*.pem
+*.pfx
+service-account.json
+service_account.json
+.claude/secret_guard_report.txt
+.ai-orchestration-backup/

@@ -22,7 +22,8 @@ These run automatically on every Claude Code session. They protect the codebase 
 | `PreToolUse` | `Bash` | `pre_bash_git_guard.sh` | Intercepts every Bash call. Blocks destructive `git` ops; delegates `git commit` / `git push` to `pre_commit.sh` for full secret scan. |
 | `PreToolUse` | `Write\|Edit` | `pre_edit_guard.sh` | Blocks any write to forbidden secret files (`.env`, `*.jks`, `env.g.dart`, etc.). |
 | `PostToolUse` | `Write\|Edit` | `post_write.sh` | Scans the file just written for leaked secret patterns. Informational. |
-| `Stop` | — | `on_stop.sh` | Appends session-end timestamp to `.claude/audit.log`. |
+| `Stop` | — | `stop_gate.sh` | **Loop gate.** If `lib/` or `test/` changed, runs `flutter analyze` → `check_rules.sh` → `flutter test`. On failure exits `2` so Claude keeps working with the failure report. Max 3 retries (`STOP_GATE_MAX_RETRIES`), then escalates to you. |
+| `Stop` | — | `on_stop.sh` | Appends session-end timestamp to `.claude/audit.log` and warns if a secret file is tracked. |
 
 **Shared library:** `.claude/hooks/_secret_patterns.sh` — single source of secret regexes, sourced by all guard hooks.
 
@@ -31,6 +32,8 @@ These run automatically on every Claude Code session. They protect the codebase 
 bash .claude/hooks/pre_commit.sh         # Run secret-leak scan on staged files manually
 bash .claude/hooks/scan_git_history.sh   # Scan ENTIRE git history for past secret leaks
 bash .claude/hooks/scan_git_history.sh --fix   # Auto-add findings to .gitignore
+bash .claude/hooks/check_rules.sh        # Golden rules + missing tests + test integrity (no deleted/skipped tests) on changed files
+CHECK_RULES_BASE=origin/main bash .claude/hooks/check_rules.sh   # Same, for the whole branch (CI mode)
 ```
 
 **Hook exit codes:** Exit `0` allows the operation, exit `2` blocks it. Post hooks can never block.
@@ -45,8 +48,8 @@ bash .claude/hooks/scan_git_history.sh --fix   # Auto-add findings to .gitignore
 {
   "mcpServers": {
     "flutter-skill": {
-      "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-flutter-skill", "server"]
+      "command": "flutter-skill",
+      "args": ["server"]
     }
   }
 }
@@ -71,10 +74,33 @@ Bash(ssl_cli generate:*) · Bash(ssl_cli build:*)
 Bash(autosafe:*)
 Bash(flutter --version) · Bash(flutter create:*) · Bash(flutter pub:*)
 Bash(dart pub:*) · Bash(dart run build_runner:*)
-Bash(sh .claude/scripts/setup_secrets.sh) · Bash(python3:*)
+Bash(sh .claude/scripts/setup_secrets.sh)
+Bash(flutter analyze:*) · Bash(flutter test:*) · Bash(flutter devices)
+Bash(bash .claude/scripts/launch_for_testing.sh:*) · Bash(bash .claude/hooks/check_rules.sh)
+Bash(git status:*) · Bash(git diff:*) · Bash(git log:*)
 ```
 
-Anything outside this list will trigger a permission prompt.
+Anything outside this list will trigger a permission prompt. `python3:*` and `bash *` are intentionally **not** pre-approved — they would allow arbitrary code (e.g. reading `.env`) without your review.
+
+**Denied** (`permissions.deny`, cannot be approved by the agent): reading `.env*`, keystores, `key.properties`, `env.g.dart`, `Secret.xcconfig`, Firebase configs; `curl`/`wget`; `git push --force`, `git reset --hard`.
+
+---
+
+### Subagents (`.claude/agents/`)
+
+| Agent | Tools | Use |
+|-------|-------|-----|
+| `test-writer` | Read, Glob, Grep, Write, Edit | Writes tests from the spec's acceptance criteria (or backfills missing ones). Never edits `lib/`. |
+| `reviewer` | Read, Glob, Grep (read-only) | Reviews the change against spec, architecture, golden rules, and OWASP MASVS. Returns a JSON verdict. |
+
+### Slash Commands (`.claude/commands/`)
+
+| Command | Purpose |
+|---------|---------|
+| `/bootstrap` | One-time project setup after install: mocktail, strict lints, safe logger, green gate. |
+| `/spec <feature> <request\|BRD\|Figma>` | Creates `docs/specs/<feature>.md` with numbered acceptance criteria and stops for your approval. |
+| `/feature <feature>` | Runs the full pipeline: spec → test-writer → code → stop-gate loop → reviewer → QA → done report. |
+| `/qa_test` | Runs the QA protocol in `.claude/skills/qa_test.md`. |
 
 ---
 
@@ -123,7 +149,8 @@ Claude Code auto-includes every `.md` file in this folder as additional context.
 
 - `ARCHITECTURE.md` — Clean Architecture deep-dive (folder rules, layer constraints)
 - `CLI_WORKFLOW.md` — Step-by-step `ssl_cli` & `autosafe_json` workflow
-- `CODE_TEMPLATES.md` — Copy-paste templates (entity, model, repo, usecase, provider, page)
+- `CODE_TEMPLATES.md` — Domain templates (repository contract, usecase)
+- `STATE_MANAGEMENT.md` — Active state management (Riverpod **or** flutter_bloc): folders, Notifier/Bloc, Page, tests. Installed by `install.sh` from `.claude/state-management/`
 - `UI_RULES.md` — Global widgets + responsive sizing details
 
 Edit these for Claude-specific deep dives. Universal rules belong in `AGENTS.md`.
@@ -138,7 +165,7 @@ Edit these for Claude-specific deep dives. Universal rules belong in `AGENTS.md`
 
 ### Audit Log
 
-`.claude/audit.log` — append-only log written by `on_stop.sh`. Records every Claude session end timestamp. Useful for compliance and incident review.
+`.claude/audit.log` — append-only log written by `on_stop.sh` and `stop_gate.sh`. Records session ends, git commands, and every gate PASS / FAIL / ESCALATED — use it to measure first-try pass rate. Useful for compliance and incident review.
 
 ---
 
@@ -151,4 +178,4 @@ Edit these for Claude-specific deep dives. Universal rules belong in `AGENTS.md`
 
 ---
 
-*Mobile Team · Claude Code orchestration v1*
+*Mobile Team · Claude Code orchestration v2 (spec → tests → code → gate loop → review → QA)*

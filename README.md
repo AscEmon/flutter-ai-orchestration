@@ -11,7 +11,7 @@ Install it with one command. The AI agent then learns how *your* project is buil
 ### ⚡ Install in one line (run inside your Flutter project)
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/AscEmon/flutter-ai-orchestration/v2.1.1/get.sh | bash
+curl -fsSL https://raw.githubusercontent.com/AscEmon/flutter-ai-orchestration/v2.2.0/get.sh | bash
 ```
 
 On first install you choose **which coding pattern the AI should follow** — the installer recommends one based on your project:
@@ -24,17 +24,23 @@ On first install you choose **which coding pattern the AI should follow** — th
   2) Your own pattern (generic) — any architecture, any state management
        • The AI learns YOUR conventions from your code (/bootstrap) and you review them.
 
-  Recommended: 2  (no ssl_cli project structure found)
-  Choose 1 or 2 [Enter = 2]:
+  Recommended: 1  (new project — ssl_cli generates a ready-made Clean Architecture structure for you)
+  Choose 1 or 2 [Enter = 1]:
 ```
+
+- **New project → recommends 1**, existing project → recommends 2 (or 1 if it was already created with ssl_cli).
+- **New project + 1:** the installer asks *1 Riverpod / 2 Bloc*, installs `ssl_cli` if it's missing (with your OK), runs **`ssl_cli create <name>`** (pattern 4) for you, then installs the AI setup on top.
+- **Existing project + 1:** `ssl_cli create` is **never** run (it would overwrite your code) — you're asked whether to use the ssl rules anyway, otherwise you get **2**.
+- **Empty folder:** the installer offers to run `flutter create` first, so one command gives you a complete new project.
 
 Not sure? Read the [ssl_cli page on pub.dev](https://pub.dev/packages/ssl_cli). If you don't create projects with `ssl_cli`, choose **2**. State management (Riverpod, Bloc, Provider, GetX…) is detected next. [More options ↓](#install-into-a-project)
 
 | Your situation | Steps |
 |---|---|
 | **Existing project** (any pattern) | `git commit` your work → run the one-liner → choose **2** → `claude` → `/bootstrap` (learns your conventions, you review) |
-| **New app, plain Flutter** | `flutter create my_app && cd my_app && git init` → one-liner → choose **2**, then your state management → `/bootstrap` (proposes a structure, you confirm) |
-| **New app with [`ssl_cli`](https://pub.dev/packages/ssl_cli)** | `dart pub global activate ssl_cli` → `ssl_cli create my_app` → `cd my_app && git init` → one-liner → choose **1** (upgrades ssl_cli's v1 AI docs) → `/bootstrap` |
+| **New app with [`ssl_cli`](https://pub.dev/packages/ssl_cli)** (recommended) | `mkdir my_app && cd my_app && git init` → one-liner → **Enter** (creates the Flutter project) → **1** → pick Riverpod / Bloc → it runs `ssl_cli create` for you → `/bootstrap` |
+| **New app, your own pattern** | same, but choose **2** and your state management → `/bootstrap` proposes a structure for you to confirm |
+| **Already ran `ssl_cli create` yourself** | run the one-liner inside it → **1** is recommended (upgrades ssl_cli's v1 AI docs) → `/bootstrap` |
 
 ---
 
@@ -91,7 +97,7 @@ STATE MANAGEMENT          riverpod · bloc · custom (Provider, GetX, MobX, Redu
 | Banned patterns in the gate | raw `Text(`/`AppBar(`…, raw casts, hardcoded colors, `print(`, dotenv | only `print(` — plus any project-widget rules you approve in `/bootstrap` |
 | New Feature Checklist | `ssl_cli module` → SafeJson → DI | learned: "add a feature the way this codebase does it" |
 
-You're asked on the **first** install; upgrades keep your choice. Skip the question with `--profile=ssl|generic` (or `AI_ORCH_PROFILE`) — e.g. in CI, where there is no terminal and the recommendation is used. State: `--state=riverpod|bloc|custom` (or `AI_ORCH_STATE`).
+You're asked on the **first** install; upgrades keep your choice. Skip the question with `--profile=ssl|generic` (or `AI_ORCH_PROFILE`). Without a terminal (CI) nothing is created or installed on its own — pass `--yes` (or `AI_ORCH_YES=1`) together with `--profile` and `--state`. State: `--state=riverpod|bloc|custom` (or `AI_ORCH_STATE`).
 
 **ssl_cli resources:** [ssl_cli on pub.dev](https://pub.dev/packages/ssl_cli) (scaffolding, Clean Architecture modules, Riverpod/Bloc) · [autosafe_json on pub.dev](https://pub.dev/packages/autosafe_json) (safe JSON parsing).
 
@@ -201,14 +207,14 @@ You're asked on the **first** install; upgrades keep your choice. Skip the quest
 
 ```bash
 git add -A && git commit -m "baseline"                        # gates compare against your last commit
-curl -fsSL https://raw.githubusercontent.com/AscEmon/flutter-ai-orchestration/v2.1.1/get.sh | bash                                           # auto-detect everything
-curl -fsSL https://raw.githubusercontent.com/AscEmon/flutter-ai-orchestration/v2.1.1/get.sh | AI_ORCH_STATE=bloc bash                        # force state: riverpod | bloc | custom
-curl -fsSL https://raw.githubusercontent.com/AscEmon/flutter-ai-orchestration/v2.1.1/get.sh | AI_ORCH_PROFILE=generic bash                   # force profile: ssl | generic
-curl -fsSL https://raw.githubusercontent.com/AscEmon/flutter-ai-orchestration/v2.1.1/get.sh | bash -s -- --profile=generic --state=riverpod  # same, flag form (note the -s --)
+curl -fsSL https://raw.githubusercontent.com/AscEmon/flutter-ai-orchestration/v2.2.0/get.sh | bash                                           # auto-detect everything
+curl -fsSL https://raw.githubusercontent.com/AscEmon/flutter-ai-orchestration/v2.2.0/get.sh | AI_ORCH_STATE=bloc bash                        # force state: riverpod | bloc | custom
+curl -fsSL https://raw.githubusercontent.com/AscEmon/flutter-ai-orchestration/v2.2.0/get.sh | AI_ORCH_PROFILE=generic bash                   # force profile: ssl | generic
+curl -fsSL https://raw.githubusercontent.com/AscEmon/flutter-ai-orchestration/v2.2.0/get.sh | bash -s -- --profile=generic --state=riverpod  # same, flag form (note the -s --)
 ```
 
 > ⚠ **`bash: --state=riverpod: invalid option`?** Options after `| bash` need `-s --` first. Easier: use the `AI_ORCH_*` variables, or just `| bash` and answer the prompt.
-> Always use a **version tag** in the URL (`v2.1.1`), never `master`. Prefer to read first? `curl -fsSLO https://raw.githubusercontent.com/AscEmon/flutter-ai-orchestration/v2.1.1/get.sh`, open `get.sh`, then `bash get.sh`. Internal mirror: `AI_ORCH_TARBALL=<url> bash get.sh`.
+> Always use a **version tag** in the URL (`v2.2.0`), never `master`. Prefer to read first? `curl -fsSLO https://raw.githubusercontent.com/AscEmon/flutter-ai-orchestration/v2.2.0/get.sh`, open `get.sh`, then `bash get.sh`. Internal mirror: `AI_ORCH_TARBALL=<url> bash get.sh`.
 
 **Option B — from a local clone** (contributors / offline):
 

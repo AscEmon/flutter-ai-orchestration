@@ -11,7 +11,7 @@ Install it with one command. The AI agent then learns how *your* project is buil
 ### ⚡ Install in one line (run inside your Flutter project)
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/AscEmon/flutter-ai-orchestration/v2.2.1/get.sh | bash
+curl -fsSL https://raw.githubusercontent.com/AscEmon/flutter-ai-orchestration/v2.2.2/get.sh | bash
 ```
 
 On first install you choose **which coding pattern the AI should follow** — the installer recommends one based on your project:
@@ -37,6 +37,7 @@ Not sure? Read the [ssl_cli page on pub.dev](https://pub.dev/packages/ssl_cli). 
 
 | Your situation | Steps |
 |---|---|
+| **Already installed** | `bash .claude/scripts/update.sh` — [details ↓](#updating-an-existing-project) |
 | **Existing project** (any pattern) | `git commit` your work → run the one-liner → choose **2** → `claude` → `/bootstrap` (learns your conventions, you review) |
 | **New app with [`ssl_cli`](https://pub.dev/packages/ssl_cli)** (recommended) | `mkdir my_app && cd my_app && git init` → one-liner → **Enter** (creates the Flutter project) → **1** → pick Riverpod / Bloc → it runs `ssl_cli create` for you → `/bootstrap` |
 | **New app, your own pattern** | same, but choose **2** and your state management → `/bootstrap` proposes a structure for you to confirm |
@@ -207,14 +208,14 @@ You're asked on the **first** install; upgrades keep your choice. Skip the quest
 
 ```bash
 git add -A && git commit -m "baseline"                        # gates compare against your last commit
-curl -fsSL https://raw.githubusercontent.com/AscEmon/flutter-ai-orchestration/v2.2.1/get.sh | bash                                           # auto-detect everything
-curl -fsSL https://raw.githubusercontent.com/AscEmon/flutter-ai-orchestration/v2.2.1/get.sh | AI_ORCH_STATE=bloc bash                        # force state: riverpod | bloc | custom
-curl -fsSL https://raw.githubusercontent.com/AscEmon/flutter-ai-orchestration/v2.2.1/get.sh | AI_ORCH_PROFILE=generic bash                   # force profile: ssl | generic
-curl -fsSL https://raw.githubusercontent.com/AscEmon/flutter-ai-orchestration/v2.2.1/get.sh | bash -s -- --profile=generic --state=riverpod  # same, flag form (note the -s --)
+curl -fsSL https://raw.githubusercontent.com/AscEmon/flutter-ai-orchestration/v2.2.2/get.sh | bash                                           # auto-detect everything
+curl -fsSL https://raw.githubusercontent.com/AscEmon/flutter-ai-orchestration/v2.2.2/get.sh | AI_ORCH_STATE=bloc bash                        # force state: riverpod | bloc | custom
+curl -fsSL https://raw.githubusercontent.com/AscEmon/flutter-ai-orchestration/v2.2.2/get.sh | AI_ORCH_PROFILE=generic bash                   # force profile: ssl | generic
+curl -fsSL https://raw.githubusercontent.com/AscEmon/flutter-ai-orchestration/v2.2.2/get.sh | bash -s -- --profile=generic --state=riverpod  # same, flag form (note the -s --)
 ```
 
 > ⚠ **`bash: --state=riverpod: invalid option`?** Options after `| bash` need `-s --` first. Easier: use the `AI_ORCH_*` variables, or just `| bash` and answer the prompt.
-> Always use a **version tag** in the URL (`v2.2.1`), never `master`. Prefer to read first? `curl -fsSLO https://raw.githubusercontent.com/AscEmon/flutter-ai-orchestration/v2.2.1/get.sh`, open `get.sh`, then `bash get.sh`. Internal mirror: `AI_ORCH_TARBALL=<url> bash get.sh`.
+> Always use a **version tag** in the URL (`v2.2.2`), never `master`. Prefer to read first? `curl -fsSLO https://raw.githubusercontent.com/AscEmon/flutter-ai-orchestration/v2.2.2/get.sh`, open `get.sh`, then `bash get.sh`. Internal mirror: `AI_ORCH_TARBALL=<url> bash get.sh`.
 
 **Option B — from a local clone** (contributors / offline):
 
@@ -232,13 +233,29 @@ claude
 > /bootstrap
 ```
 
-### Upgrade later
+### Updating an existing project
+
+Already using it? Commit your work, then from the project root:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/AscEmon/flutter-ai-orchestration/<new-tag>/get.sh | AI_ORCH_VERSION=<new-tag> bash -s -- --force
+bash .claude/scripts/update.sh            # update to the latest release
+bash .claude/scripts/update.sh --check    # just show installed vs latest
+bash .claude/scripts/update.sh v2.2.2     # move to a specific release (also for rollback)
 ```
 
-Upgrades back up everything first (`.ai-orchestration-backup/`), replace only the files the installer manages, and **keep** your learned `PROJECT_CONVENTIONS.md`, `PROJECT_NOTES.md` and `gate.local.conf`.
+Installed before v2.2.2 (no `update.sh` yet)? Run this once — afterwards `update.sh` is there:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/AscEmon/flutter-ai-orchestration/v2.2.2/get.sh | bash -s -- --update
+```
+
+What an update does:
+
+| Kept (yours) | Replaced (managed) |
+|---|---|
+| profile + state choice, learned `PROJECT_CONVENTIONS.md`, `PROJECT_NOTES.md`, `gate.local.conf`, `settings.local.json`, your own files in `.claude/` | core hooks, commands, agents, scripts, `AGENTS.md`, `CLAUDE.md`, profile rules, `gate.conf` |
+
+Everything is backed up first to `.ai-orchestration-backup/<timestamp>/`. Review with `git diff`, then commit. What changed in each version: [CHANGELOG.md](CHANGELOG.md).
 
 ---
 
@@ -291,6 +308,7 @@ Keep features small: one module, 3–8 acceptance criteria.
 flutter-ai-orchestration/
 ├── get.sh                    ← one-line installer (downloads a release tag, runs install.sh)
 ├── install.sh                ← detects profile + state, installs / upgrades safely (backup, manifest)
+├── CHANGELOG.md              ← what changed in each release
 ├── AGENTS.md                 ← CORE universal rules + pipeline (every AI IDE)
 ├── CLAUDE.md                 ← Claude Code entry point (@imports AGENTS.md)
 ├── .mcp.json  .env.example
@@ -412,9 +430,9 @@ EXTRA_BANNED_PATTERNS='
 ## 🏷️ Releasing (maintainers)
 
 1. Merge changes to `master`.
-2. Bump the default `VERSION` in `get.sh` and the tag in this README's install URLs.
+2. Bump the default `VERSION` in `get.sh`, the tag in this README's install URLs, and add a `CHANGELOG.md` entry.
 3. Commit, then: `git tag -a vX.Y.Z -m "vX.Y.Z" && git push origin master --follow-tags`.
-4. Projects upgrade with the one-liner for the new tag plus `--force`.
+4. Add the release notes to `CHANGELOG.md`. Projects update with `bash .claude/scripts/update.sh`.
 
 ## 🤝 Contributing
 

@@ -141,6 +141,7 @@ Anything outside this list will trigger a permission prompt. `python3:*` and `ba
 |--------|---------|
 | `.claude/scripts/setup_secrets.sh` | Reads `.env` → decodes JKS, Firebase configs → generates `key.properties` + `Secret.xcconfig`. Re-run whenever `.env` changes. |
 | `.claude/scripts/launch_for_testing.sh <DEVICE_ID>` | Starts `flutter run` in background, captures VM URL to `.claude/tmp/vm_url.txt` for MCP testing. |
+| `.claude/scripts/update.sh [--check \| vX.Y.Z]` | Updates this project's orchestration to the latest (or given) release — backs up first, keeps learned conventions and local overrides. Run by humans, not the agent. |
 | `.claude/scripts/setup_ide.sh` | Interactive IDE setup — choose your IDE, generates only the needed config files. Also offers universal git pre-commit hook. |
 
 ---

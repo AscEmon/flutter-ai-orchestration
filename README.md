@@ -11,7 +11,7 @@ Install it with one command. The AI agent then learns how *your* project is buil
 ### ⚡ Install in one line (run inside your Flutter project)
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/AscEmon/flutter-ai-orchestration/v2.2.0/get.sh | bash
+curl -fsSL https://raw.githubusercontent.com/AscEmon/flutter-ai-orchestration/v2.2.1/get.sh | bash
 ```
 
 On first install you choose **which coding pattern the AI should follow** — the installer recommends one based on your project:
@@ -207,14 +207,14 @@ You're asked on the **first** install; upgrades keep your choice. Skip the quest
 
 ```bash
 git add -A && git commit -m "baseline"                        # gates compare against your last commit
-curl -fsSL https://raw.githubusercontent.com/AscEmon/flutter-ai-orchestration/v2.2.0/get.sh | bash                                           # auto-detect everything
-curl -fsSL https://raw.githubusercontent.com/AscEmon/flutter-ai-orchestration/v2.2.0/get.sh | AI_ORCH_STATE=bloc bash                        # force state: riverpod | bloc | custom
-curl -fsSL https://raw.githubusercontent.com/AscEmon/flutter-ai-orchestration/v2.2.0/get.sh | AI_ORCH_PROFILE=generic bash                   # force profile: ssl | generic
-curl -fsSL https://raw.githubusercontent.com/AscEmon/flutter-ai-orchestration/v2.2.0/get.sh | bash -s -- --profile=generic --state=riverpod  # same, flag form (note the -s --)
+curl -fsSL https://raw.githubusercontent.com/AscEmon/flutter-ai-orchestration/v2.2.1/get.sh | bash                                           # auto-detect everything
+curl -fsSL https://raw.githubusercontent.com/AscEmon/flutter-ai-orchestration/v2.2.1/get.sh | AI_ORCH_STATE=bloc bash                        # force state: riverpod | bloc | custom
+curl -fsSL https://raw.githubusercontent.com/AscEmon/flutter-ai-orchestration/v2.2.1/get.sh | AI_ORCH_PROFILE=generic bash                   # force profile: ssl | generic
+curl -fsSL https://raw.githubusercontent.com/AscEmon/flutter-ai-orchestration/v2.2.1/get.sh | bash -s -- --profile=generic --state=riverpod  # same, flag form (note the -s --)
 ```
 
 > ⚠ **`bash: --state=riverpod: invalid option`?** Options after `| bash` need `-s --` first. Easier: use the `AI_ORCH_*` variables, or just `| bash` and answer the prompt.
-> Always use a **version tag** in the URL (`v2.2.0`), never `master`. Prefer to read first? `curl -fsSLO https://raw.githubusercontent.com/AscEmon/flutter-ai-orchestration/v2.2.0/get.sh`, open `get.sh`, then `bash get.sh`. Internal mirror: `AI_ORCH_TARBALL=<url> bash get.sh`.
+> Always use a **version tag** in the URL (`v2.2.1`), never `master`. Prefer to read first? `curl -fsSLO https://raw.githubusercontent.com/AscEmon/flutter-ai-orchestration/v2.2.1/get.sh`, open `get.sh`, then `bash get.sh`. Internal mirror: `AI_ORCH_TARBALL=<url> bash get.sh`.
 
 **Option B — from a local clone** (contributors / offline):
 

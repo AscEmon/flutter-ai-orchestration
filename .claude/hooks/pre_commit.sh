@@ -65,11 +65,11 @@ while IFS= read -r file; do
 
     FILE_BLOCKED=0
     for entry in "${SECRET_PATTERNS[@]}"; do
-        label="${entry%%%:::*}"
+        label="${entry%%:::*}"
         pattern="${entry#*:::}"
 
         # grep only the '+' lines from the diff
-        HIT=$(echo "$PATCH" | grep -P "^\+" | grep -Pi "$pattern" 2>/dev/null | head -1)
+        HIT=$(echo "$PATCH" | grep -E "^\+" | grep -Ei -- "$pattern" 2>/dev/null | head -1)
         if [ -n "$HIT" ]; then
             echo "    ✖  $file"
             echo "       Secret type : $label"

@@ -5,7 +5,7 @@
 # Claude Code PostToolUse Hook — runs after every Write|Edit.
 # Performs lightweight checks on the written file.
 #
-# Exit 0 = success (informational only, post hooks don't block)
+# Exit 0 = ok · Exit 2 = secret found → stderr is fed back to Claude so it removes it
 # ============================================================
 
 INPUT=$(cat)
@@ -23,6 +23,28 @@ except:
 " 2>/dev/null)
 
 [ -z "$FILE" ] && exit 0
+
+# ── Secret scan of the file just written (exit 2 → Claude sees this and must fix it) ──
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+case "$FILE" in
+    *"/.claude/hooks/"*|*"/.claude/docs/"*) ;;     # orchestration's own pattern docs
+    *)
+        if [ -f "$FILE" ] && [ -f "$SCRIPT_DIR/_secret_patterns.sh" ]; then
+            # shellcheck disable=SC1091
+            source "$SCRIPT_DIR/_secret_patterns.sh"
+            if ! FOUND=$(scan_file_for_secrets "$FILE"); then
+                {
+                    echo "SECRET DETECTED in the file you just wrote:"
+                    echo "$FOUND"
+                    echo "Remove the value now. Read secrets through the project's approved mechanism"
+                    echo "(PROJECT_CONVENTIONS.md → Secrets) and use [PLACEHOLDER] in examples and tests."
+                } >&2
+                echo "[$(date '+%Y-%m-%d %H:%M:%S')] SECRET_WRITE_BLOCKED $FILE" >> "${CLAUDE_PROJECT_DIR:-.}/.claude/audit.log" 2>/dev/null
+                exit 2
+            fi
+        fi
+        ;;
+esac
 
 BNAME=$(basename "$FILE")
 

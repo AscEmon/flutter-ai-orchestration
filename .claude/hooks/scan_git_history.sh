@@ -62,11 +62,11 @@ echo "  (This may take a minute on large repos)"
 echo ""
 
 for entry in "${SECRET_PATTERNS[@]}"; do
-    label="${entry%%%:::*}"
+    label="${entry%%:::*}"
     pattern="${entry#*:::}"
 
     # Search all commits for this pattern in added lines
-    HITS=$(git log --all -p --follow 2>/dev/null | grep -Pi "^\+.*$pattern" 2>/dev/null | head -3)
+    HITS=$(git log --all -p --follow 2>/dev/null | grep -Ei -- "^\+.*$pattern" 2>/dev/null | head -3)
 
     if [ -n "$HITS" ]; then
         # Find which commit(s)

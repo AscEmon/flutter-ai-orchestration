@@ -21,7 +21,7 @@ These run automatically on every Claude Code session. They protect the codebase 
 |-------|---------|-------------|---------|
 | `PreToolUse` | `Bash` | `pre_bash_git_guard.sh` | Intercepts every Bash call. Blocks destructive `git` ops; delegates `git commit` / `git push` to `pre_commit.sh` for full secret scan. |
 | `PreToolUse` | `Write\|Edit` | `pre_edit_guard.sh` | Blocks any write to forbidden secret files (`.env`, `*.jks`, `env.g.dart`, etc.). |
-| `PostToolUse` | `Write\|Edit` | `post_write.sh` | Scans the file just written for leaked secret patterns. Informational. |
+| `PostToolUse` | `Write\|Edit` | `post_write.sh` | Scans the file just written for secret patterns — on a hit exits `2`, so Claude is told to remove it (logged as `SECRET_WRITE_BLOCKED`). Also reminds about asset / `autosafe` / `build_runner` steps. |
 | `Stop` | — | `stop_gate.sh` | **Loop gate.** If `lib/` or `test/` changed, runs `check_rules.sh` → analyzer (errors anywhere, warnings in changed files) → tests (all or related). On failure exits `2` so Claude keeps working with the failure report. Max 3 retries (`STOP_GATE_MAX_RETRIES`), then escalates to you. Scopes in `.claude/gate.conf` / `.claude/gate.local.conf`. |
 | `Stop` | — | `on_stop.sh` | Appends session-end timestamp to `.claude/audit.log` and warns if a secret file is tracked. |
 

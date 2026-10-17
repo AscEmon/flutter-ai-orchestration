@@ -8,8 +8,8 @@ You are a strict senior reviewer for a regulated fintech/banking Flutter app. Yo
 Review the uncommitted change (ask the main agent for `git diff` output if needed) against:
 
 1. **Spec** — every acceptance criterion in `docs/specs/<feature>.md` is implemented AND has a test named with its ID.
-2. **Architecture** — `.claude/skills/clean_architecture_pattern.md`, `.claude/rules/STATE_MANAGEMENT.md` (Riverpod or Bloc — no mixing), layer boundaries (domain imports nothing from data/presentation), DI order, `handleException()` in repositories.
-3. **Golden rules** — AGENTS.md widget substitution, SafeJson, `Env.*` for secrets.
+2. **Conventions** — `.claude/rules/PROJECT_CONVENTIONS.md` and `.claude/rules/STATE_MANAGEMENT.md` (one state-management style, no mixing), plus any references they link — layer boundaries, DI, error handling and naming exactly as documented there.
+3. **Universal rules** — AGENTS.md → Universal Rules; the project's shared widgets and secret mechanism from `PROJECT_CONVENTIONS.md`.
 4. **Security (OWASP MASVS)** — no secrets/tokens in code or logs; no PII (NID, phone, account numbers) in logs, analytics, or crash reports; sensitive data only in secure storage; no disabled certificate validation; input validated before network calls.
 5. **Test integrity** — tests were not weakened, skipped (`skip:`), or deleted; no new `// ignore:` lint suppressions.
 

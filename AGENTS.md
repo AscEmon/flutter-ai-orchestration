@@ -1,126 +1,31 @@
-# Mobile Team — AI Agent Context
+# AI Agent Context — Flutter
 
-> **Canonical source of truth for every AI coding tool.**
-> Read natively by: GitHub Copilot · OpenAI Codex · Cursor · Aider · Claude Code
-
----
-
-## Stack (Always Active)
-
-| Concern | Choice |
-|---------|--------|
-| Language | Dart / Flutter (3.11+) |
-| Architecture | Clean Architecture — feature-based |
-| State | **Riverpod or flutter_bloc** — chosen at `ssl_cli create`; the active one is in `.claude/rules/STATE_MANAGEMENT.md` |
-| HTTP | Dio 5.x — `response.data` is already parsed |
-| Error type | `Either<Failure, T>` via `dartz` |
-| DI | GetIt (`sl` singleton) |
-| Sizing | `flutter_screenutil` (`.w .h .sp .r`) |
-| Scaffolding | `ssl_cli` (Dart global) |
-| Safe JSON | `autosafe_json` → `SafeJson.as*()` |
-| Secrets | `envied` → always read via `Env.*` |
+> **Canonical source of truth for every AI coding tool** (Claude Code · Copilot · Codex · Cursor · Aider · Gemini).
+> This file holds the rules that apply to **every** project. Project-specific rules live in `.claude/rules/`.
 
 ---
 
-## 5 Golden Rules (Never Break)
+## Read First (every task)
 
-1. **Scaffold with CLI** — never create folders manually → `ssl_cli module <name>`
-2. **Safe JSON only** — never raw-cast → `SafeJson.asString(json['x'])`, not `json['x'] as String`
-3. **Secrets via envied** — never hardcode → `Env.apiKey`, never `dotenv` / `String.fromEnvironment`
-4. **Global widgets only** — never raw Flutter → `GlobalText`, `GlobalButton`, `GlobalLoader`, etc.
-5. **Never touch generated files** — `env.g.dart`, `key.properties`, `Secret.xcconfig` are auto-generated
+| File | What it tells you |
+|------|-------------------|
+| `.claude/rules/PROJECT_CONVENTIONS.md` | **This project's** stack, architecture, folder layout, naming, DI, shared widgets, error handling, secrets, new-feature checklist |
+| `.claude/rules/STATE_MANAGEMENT.md` | **This project's** state management pattern + how to test it |
+| `.claude/docs/SECURITY.md` | Secret files you must never read or write, logging rules |
+| `.claude/rules/*.md`, `.claude/skills/*.md` | Deeper references linked from the files above |
 
-### Data → Domain mapping pattern (mandatory read)
-
-Before writing **any** model, entity, or repository:
-
-> **Read `.claude/skills/clean_architecture_pattern.md` first.**
-
-It documents the non-negotiable layering this codebase uses: nullable `*_response.dart` DTOs decoded with `SafeJson.as*`, non-nullable `*_entity.dart` value objects with **default values for every field**, and explicit field-by-field model → entity mapping inside `*_repository_impl.dart` with `?? defaultValue` fallbacks. Models **do not** extend entities. Ground-truth reference: the templates in that file (adapt the `Home*` example to your feature).
+If `PROJECT_CONVENTIONS.md` says **"NOT LEARNED YET"**, stop and ask the user to run `/bootstrap` (Claude Code) before writing feature code.
 
 ---
 
-## Agent Decision Flow (Run Every Task)
+## Universal Rules (every project, every profile)
 
-```
-Received a task?
-  ↓
-ssl_cli help --all       → not found? → dart pub global activate ssl_cli
-  ↓
-autosafe --version       → not found? → dart pub global activate autosafe_json
-  ↓
-New project?    → Yes → ssl_cli create <name>   (pattern 4 · state mgmt 1 Riverpod / 2 Bloc)
-New feature?    → Yes → ssl_cli module <name>   (pattern 3 · SAME state mgmt as STATE_MANAGEMENT.md)
-Modified model? → Yes → autosafe /path/to/model.dart
-Added assets?   → Yes → ssl_cli generate k_assets.dart
-  ↓
-Fill logic · Register DI in service_locator.dart · Verify .gitignore
-```
-
----
-
-## DI Registration Order (service_locator.dart)
-
-```dart
-// 1. DataSources    → registerLazySingleton
-// 2. Repository     → registerLazySingleton
-// 3. UseCases       → registerFactory   ← always Factory, never Singleton
-```
-
----
-
-## Widget Substitution Table
-
-| ❌ Never | ✅ Always |
-|---------|---------|
-| `Text(...)` | `GlobalText(str: ...)` |
-| `ElevatedButton(...)` | `GlobalButton(...)` |
-| `TextFormField(...)` | `GlobalTextFormField(...)` |
-| `DropdownButton(...)` | `GlobalDropdown(...)` |
-| `Image.asset(...)` | `GlobalImageLoader(...)` |
-| `CircularProgressIndicator()` | `GlobalLoader()` |
-| `AppBar(...)` | `GlobalAppBar(...)` |
-| `showSnackBar(...)` | `ViewUtil.snackbar(context, msg)` |
-| `Color(0xFF...)` hardcoded | `AppColors.primary.color` |
-| Asset path string | `ImageNamePng.x` / `SvgName.x` |
-| `200` / `16` (raw numbers) | `200.w` / `16.sp` / `12.r` |
-
-> **Note:** `GlobalText` handles `.sp` internally — pass `fontSize` as a plain `double`, not `16.sp`.
-
----
-
-## Key Error Handling Rule
-
-Every repository method MUST use `handleException()` — **never** manual try/catch:
-
-```dart
-@override
-Future<Either<Failure, ProductEntity>> getProduct(String id) {
-  return handleException(() async {
-    final result = await remoteDataSource.getProduct(id);
-    return result.toEntity();
-  });
-}
-```
-
----
-
-## Detailed References
-
-Pull these files when you need full templates, patterns, or rules for a specific topic:
-
-| Topic | File |
-|-------|------|
-| **Data → Domain mapping (autosafe_json, entity defaults, repo bridge)** | `.claude/skills/clean_architecture_pattern.md` |
-| Architecture, folder structure, naming, DI patterns | `.claude/rules/ARCHITECTURE.md` |
-| CLI usage, ssl_cli & autosafe step-by-step workflow | `.claude/rules/CLI_WORKFLOW.md` |
-| Domain templates (Repository contract, UseCase) | `.claude/rules/CODE_TEMPLATES.md` |
-| **State management** — folders, Notifier/Bloc, Page, tests | `.claude/rules/STATE_MANAGEMENT.md` |
-| UI rules, global widgets, responsive sizing | `.claude/rules/UI_RULES.md` |
-| Security rules, forbidden files, envied setup, .gitignore | `.claude/docs/SECURITY.md` |
-| QA & testing guidance | `.claude/skills/qa_test.md` |
-
-> **AI agents:** Read the relevant reference file before generating any code for that topic.
+1. **Match the codebase.** Before writing a file, open 1–2 existing files of the same kind and follow their structure, naming and imports. Conventions in `PROJECT_CONVENTIONS.md` win over your defaults.
+2. **No secrets in code, logs or prompts.** Never read the files listed in `SECURITY.md`. Never hardcode keys, tokens or URLs with credentials.
+3. **No PII in logs.** Never log national IDs, phone numbers, account/card numbers, tokens or full API responses. No `print()` in `lib/`.
+4. **Never edit generated files** (`*.g.dart`, `*.freezed.dart`, `*.gr.dart`, `env.g.dart`, `key.properties`, `Secret.xcconfig`) — regenerate them.
+5. **Tests are the contract.** Never weaken, skip or delete a test to make the gate pass, and never add `// ignore:` to silence the analyzer. Fix the code.
+6. **Small, focused changes.** No unrelated refactors, no new packages unless the spec asks for them.
 
 ---
 
@@ -137,12 +42,12 @@ Pull these files when you need full templates, patterns, or rules for a specific
 ```
 
 1. **Spec** → write `docs/specs/<feature>.md` with numbered acceptance criteria (`AC-01`…, Given/When/Then), API contract, PII/compliance flags and open questions. **Stop and get the user's approval.** (Claude Code: `/spec`)
-2. **Tests first** → one test per acceptance criterion, named with its ID: `test('AC-01: ...')`. Mirror paths under `test/`. Every `*_usecase.dart`, `*_provider.dart` (Riverpod) and `*_bloc.dart` (Bloc) needs a test. (Claude Code: `test-writer` subagent)
-3. **Code** → `ssl_cli` → fill logic → `autosafe` → register DI. Fix the code to satisfy the tests — **never weaken, skip, or delete tests**, and never add `// ignore:`.
+2. **Tests first** → one test per acceptance criterion, named with its ID: `test('AC-01: ...')`. Every business-logic file (use case, notifier, bloc, cubit, controller, view model) needs a test. (Claude Code: `test-writer` subagent)
+3. **Code** → follow the **New Feature Checklist** in `PROJECT_CONVENTIONS.md`. Fix the code to satisfy the tests.
 4. **Gate** → must pass before you say "done":
-   `flutter analyze --no-fatal-infos` · `bash .claude/hooks/check_rules.sh` · `flutter test`
-   (Claude Code runs this automatically via the Stop hook and loops until green, max 3 attempts.)
-5. **Review** → check acceptance criteria, architecture, golden rules, and security (no PII/secrets in logs). (Claude Code: `reviewer` subagent)
+   `bash .claude/hooks/check_rules.sh` · analyzer (no errors anywhere, no warnings in changed files) · tests
+   (Claude Code runs this automatically via the Stop hook and loops until green, max 3 attempts. Other IDEs: run `bash .claude/hooks/stop_gate.sh --manual`.)
+5. **Review** → acceptance criteria, conventions, security (no PII/secrets in logs). (Claude Code: `reviewer` subagent)
 6. **QA** → manual run on device with flutter-skill (`/qa_test`). List bugs and ask the user what to do.
 7. **Done** → report a table of AC-ID → test → status, plus files changed.
 
@@ -150,4 +55,4 @@ Pull these files when you need full templates, patterns, or rules for a specific
 
 ---
 
-*Maintained by Mobile Team · See `.claude/` for all extended rules*
+*flutter-ai-orchestration · core rules — profile rules in `.claude/rules/`*

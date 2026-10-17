@@ -119,7 +119,7 @@ Walk the screen exactly as a real user would:
 
 ### 3c — Code Quality Checks (Visual Scan)
 While testing, flag any of these as bugs:
-- Raw `Text()`, `ElevatedButton()`, `CircularProgressIndicator()` → must use Global widgets
+- Raw Flutter widgets where `PROJECT_CONVENTIONS.md` requires project widgets (e.g. Global* widgets in the ssl profile)
 - Hardcoded sizes like `width: 200` → must use `.w`, `.h`, `.sp`, `.r`
 - Hardcoded hex colors → must use `AppColors.*`
 - Hardcoded asset paths → must use `ImageNamePng.*` / `SvgName.*`

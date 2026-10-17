@@ -19,6 +19,8 @@
       "Bash(bash .claude/scripts/launch_for_testing.sh:*)",
       "Bash(bash .claude/hooks/check_rules.sh)",
       "Bash(bash .claude/hooks/pre_commit.sh)",
+      "Bash(dart analyze:*)",
+      "Bash(bash .claude/hooks/stop_gate.sh --manual)",
       "Bash(git status:*)",
       "Bash(git diff:*)",
       "Bash(git log:*)",

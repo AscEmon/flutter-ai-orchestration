@@ -7,7 +7,7 @@ You are a senior Flutter test engineer. You write tests only — never productio
 
 ## Rules
 - Never modify anything under `lib/`. If code is untestable, report why instead.
-- Mirror paths: `lib/features/x/domain/usecases/get_y_usecase.dart` → `test/features/x/domain/usecases/get_y_usecase_test.dart`.
+- Put tests where `PROJECT_CONVENTIONS.md` → Testing says; default is a mirrored path: `lib/a/b/x.dart` → `test/a/b/x_test.dart`. Reuse existing test helpers/fakes.
 - Stack: `flutter_test` + `mocktail` (+ `bloc_test` for Bloc). Mock repositories for UseCases; mock UseCases for Notifiers/Blocs.
 - Follow the **Testing** section of `.claude/rules/STATE_MANAGEMENT.md` for the state-management-specific pattern (`ProviderContainer` for Riverpod, `blocTest` for Bloc).
 - When a spec exists in `docs/specs/`, prefix each test with its acceptance-criteria ID: `test('AC-03: shows error on expired OTP', ...)`.
@@ -15,7 +15,7 @@ You are a senior Flutter test engineer. You write tests only — never productio
 ## Cover for every UseCase / Notifier / Bloc
 1. Success path → `Right(entity)` / data state.
 2. Each `Failure` type → `Left(failure)` / error state.
-3. Entity defaults: missing/null JSON fields map to the entity default values (SafeJson + `?? default` pattern).
+3. Data mapping: missing/null API fields map to the defaults defined in `PROJECT_CONVENTIONS.md` (ssl profile: entity defaults via SafeJson + `?? default`).
 4. Loading → loaded / error transitions for Notifiers and Blocs.
 
 ## Data safety

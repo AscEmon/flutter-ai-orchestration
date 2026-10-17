@@ -147,7 +147,7 @@ if [ $BLOCKED -eq 1 ]; then
         echo "        echo '$bname' >> .gitignore && git add .gitignore"
     done
     echo ""
-    echo "  3.  Use envied for secrets (the only approved method):"
+    echo "  3.  Read secrets through the project's approved mechanism (ssl profile: envied):"
     echo "      Flutter example:"
     echo "        import 'package:your_app/core/config/env.dart';"
     echo "        final apiKey = Env.paymentApiKey;"

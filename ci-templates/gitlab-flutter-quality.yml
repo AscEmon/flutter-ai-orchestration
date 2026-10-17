@@ -11,9 +11,5 @@ flutter-quality:
   script:
     - git fetch origin $CI_MERGE_REQUEST_TARGET_BRANCH_NAME
     - flutter pub get
-    - flutter analyze --no-fatal-infos
-    - bash .claude/hooks/check_rules.sh
-    - flutter test --coverage
-  artifacts:
-    when: always
-    paths: [coverage/lcov.info]
+    - bash .claude/hooks/stop_gate.sh --manual   # rules + analyzer (changed files) + tests, from .claude/gate.conf
+  # Coverage: add `- flutter test --coverage` and an artifacts: block if you publish it.

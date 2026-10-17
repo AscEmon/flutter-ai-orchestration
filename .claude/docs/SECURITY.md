@@ -44,10 +44,10 @@ project-root/
 
 ```
 ✅ DO:
-  - Always use Env.* from lib/core/config/env.dart for secrets in Dart code
+  - Always read secrets through the project's approved mechanism (PROJECT_CONVENTIONS.md → Secrets; ssl profile: Env.* via envied)
   - Always place JKS at android/app/release.jks
   - Always run sh .claude/scripts/setup_secrets.sh after .env changes
-  - Always run dart run build_runner build after .env or env.dart changes
+  - Re-run code generation after config changes if the project uses it (e.g. dart run build_runner build for envied)
   - Instruct developers to fill .env from the team vault
 
 ❌ NEVER DO:
@@ -56,7 +56,7 @@ project-root/
   - Generate code with hardcoded API keys, secrets, or passwords
   - Suggest committing any secret file to version control
   - Write any secret value in a comment, log statement, or print()
-  - Use flutter_dotenv or String.fromEnvironment — envied is the only approved method
+  - Introduce a secret mechanism other than the one in PROJECT_CONVENTIONS.md → Secrets
   - Suggest placing the JKS outside android/app/ folder
 ```
 
@@ -71,25 +71,16 @@ If the user pastes content that contains secrets (tokens, keys, passwords):
 
 ---
 
-### Secret Handling Code Pattern (MANDATORY — envied only)
+### Secret Handling Code Pattern
 
 ```dart
 // ❌ NEVER generate this
-const apiKey = 'sk-abc123-real-secret-key';
+const apiKey = '[REAL_SECRET_VALUE]';   // any literal secret
 
-// ❌ NEVER generate these either
-final apiKey = dotenv.env['API_KEY'] ?? '';
-const apiKey = String.fromEnvironment('API_KEY');
-
-// ✅ ONLY approved pattern — read from Env.* (envied)
-import 'package:your_app/core/config/env.dart';
-
-final apiKey  = Env.paymentApiKey;
-final mapsKey = Env.googleMapsApiKey;
-final baseUrl = Env.baseUrlLive;
+// ✅ Read through the project's approved accessor (PROJECT_CONVENTIONS.md → Secrets), for example:
+final apiKey = Env.paymentApiKey;                               // envied (ssl profile)
+const apiKey = String.fromEnvironment('PAYMENT_API_KEY');       // --dart-define, only if the project already uses it
 ```
-
-All fields declared in `lib/core/config/env.dart`. Generated obfuscated into `lib/core/config/env.g.dart`.
 
 ---
 
@@ -101,7 +92,7 @@ BASE_URL_DEV=https://dev-api.yourapp.com
 BASE_URL_LOCAL=http://192.168.1.100:8000
 BASE_IMAGE_URL_LIVE=https://images.yourapp.com
 BASE_IMAGE_URL_DEV=https://dev-images.yourapp.com
-GOOGLE_MAPS_API_KEY=AIzaSyDUMMY_replace
+GOOGLE_MAPS_API_KEY=[PLACEHOLDER]
 PAYMENT_API_KEY=pk_test_DUMMY_replace
 SMS_API_KEY=sms_DUMMY_replace
 KEYSTORE_PASSWORD=dummy_replace

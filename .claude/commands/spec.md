@@ -12,5 +12,5 @@ Create `docs/specs/$1.md` from: $ARGUMENTS
    - **Non-functional** — security (PII handled? logged?), performance, offline behaviour.
    - **Compliance flags** — PII / financial data touched; Bangladesh Bank or PCI-DSS considerations.
    - **Open questions** — anything ambiguous.
-   - **Task breakdown** — ssl_cli module, files per layer, which ACs each task covers.
+   - **Task breakdown** — files per layer following `.claude/rules/PROJECT_CONVENTIONS.md` → New Feature Checklist, and which ACs each task covers.
 3. Show me the open questions and STOP. Do not continue until I approve the spec.

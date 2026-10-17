@@ -31,16 +31,16 @@ case "$BNAME" in
     *.png|*.jpg|*.jpeg|*.svg|*.webp)
         echo ""
         echo "  📸 Asset file written: $BNAME"
-        echo "  💡 Remember to run: ssl_cli generate k_assets.dart"
+        command -v ssl_cli >/dev/null 2>&1 && echo "  💡 Remember to run: ssl_cli generate k_assets.dart"
         echo ""
         ;;
 esac
 
 # ── Reminder: run autosafe if a model file was modified ───
-if [[ "$FILE" == *"_model.dart" ]]; then
+if [[ "$FILE" == *"_model.dart" || "$FILE" == *"_response.dart" ]]; then
     echo ""
     echo "  🔧 Model file modified: $BNAME"
-    echo "  💡 Remember to run: autosafe $FILE"
+    command -v autosafe >/dev/null 2>&1 && echo "  💡 Remember to run: autosafe $FILE"
     echo ""
 fi
 

@@ -22,7 +22,7 @@ These run automatically on every Claude Code session. They protect the codebase 
 | `PreToolUse` | `Bash` | `pre_bash_git_guard.sh` | Intercepts every Bash call. Blocks destructive `git` ops; delegates `git commit` / `git push` to `pre_commit.sh` for full secret scan. |
 | `PreToolUse` | `Write\|Edit` | `pre_edit_guard.sh` | Blocks any write to forbidden secret files (`.env`, `*.jks`, `env.g.dart`, etc.). |
 | `PostToolUse` | `Write\|Edit` | `post_write.sh` | Scans the file just written for leaked secret patterns. Informational. |
-| `Stop` | — | `stop_gate.sh` | **Loop gate.** If `lib/` or `test/` changed, runs `flutter analyze` → `check_rules.sh` → `flutter test`. On failure exits `2` so Claude keeps working with the failure report. Max 3 retries (`STOP_GATE_MAX_RETRIES`), then escalates to you. |
+| `Stop` | — | `stop_gate.sh` | **Loop gate.** If `lib/` or `test/` changed, runs `check_rules.sh` → analyzer (errors anywhere, warnings in changed files) → tests (all or related). On failure exits `2` so Claude keeps working with the failure report. Max 3 retries (`STOP_GATE_MAX_RETRIES`), then escalates to you. Scopes in `.claude/gate.conf` / `.claude/gate.local.conf`. |
 | `Stop` | — | `on_stop.sh` | Appends session-end timestamp to `.claude/audit.log` and warns if a secret file is tracked. |
 
 **Shared library:** `.claude/hooks/_secret_patterns.sh` — single source of secret regexes, sourced by all guard hooks.
@@ -78,6 +78,8 @@ Bash(sh .claude/scripts/setup_secrets.sh)
 Bash(flutter analyze:*) · Bash(flutter test:*) · Bash(flutter devices)
 Bash(bash .claude/scripts/launch_for_testing.sh:*) · Bash(bash .claude/hooks/check_rules.sh)
 Bash(git status:*) · Bash(git diff:*) · Bash(git log:*)
+Bash(dart analyze:*) · Bash(bash .claude/hooks/stop_gate.sh --manual)
+(ssl_cli / autosafe entries are harmless in non-ssl projects — the commands simply don't exist there)
 ```
 
 Anything outside this list will trigger a permission prompt. `python3:*` and `bash *` are intentionally **not** pre-approved — they would allow arbitrary code (e.g. reading `.env`) without your review.
@@ -128,7 +130,7 @@ Anything outside this list will trigger a permission prompt. `python3:*` and `ba
 
 **Phase 4: Bug report → STOP**
 - Output structured markdown report with: bug, trigger sequence, suspected root cause
-- **Do NOT write any fix.** Pause and ask: *"Which of these would you like me to resolve using the ssl_cli architecture?"*
+- **Do NOT write any fix.** Pause and ask: *"Which of these would you like me to resolve?"* (fixes follow `PROJECT_CONVENTIONS.md`)
 - Only proceed to write code after user explicitly approves.
 
 ---
@@ -143,17 +145,18 @@ Anything outside this list will trigger a permission prompt. `python3:*` and `ba
 
 ---
 
-### Modular Rules (`.claude/rules/`)
+### Modular Rules (`.claude/rules/`) — installed per profile
 
-Claude Code auto-includes every `.md` file in this folder as additional context. Currently:
+Claude Code auto-includes every `.md` file in this folder. `install.sh` fills it from `profiles/<profile>/`:
 
-- `ARCHITECTURE.md` — Clean Architecture deep-dive (folder rules, layer constraints)
-- `CLI_WORKFLOW.md` — Step-by-step `ssl_cli` & `autosafe_json` workflow
-- `CODE_TEMPLATES.md` — Domain templates (repository contract, usecase)
-- `STATE_MANAGEMENT.md` — Active state management (Riverpod **or** flutter_bloc): folders, Notifier/Bloc, Page, tests. Installed by `install.sh` from `.claude/state-management/`
-- `UI_RULES.md` — Global widgets + responsive sizing details
+| File | ssl profile | generic profile |
+|------|-------------|-----------------|
+| `PROJECT_CONVENTIONS.md` | Mobile Team house style (managed) | **Learned from your code** by `/bootstrap` — yours to edit, kept on upgrade |
+| `STATE_MANAGEMENT.md` | ssl_cli Riverpod / Bloc templates | Neutral Riverpod / Bloc guide, or learned (`custom`) for Provider, GetX, MobX… |
+| `ARCHITECTURE.md`, `CLI_WORKFLOW.md`, `CODE_TEMPLATES.md`, `UI_RULES.md` | ✔ | — |
+| `PROJECT_NOTES.md` (optional) | your own additions — never touched by the installer | same |
 
-Edit these for Claude-specific deep dives. Universal rules belong in `AGENTS.md`.
+Gate settings: `.claude/gate.conf` (profile, managed) + `.claude/gate.local.conf` (your overrides: `EXTRA_BANNED_PATTERNS`, `REQUIRE_TESTS_FOR`, `ANALYZE_SCOPE`, `TEST_SCOPE`).
 
 ---
 

@@ -13,8 +13,6 @@ jobs:
       - uses: subosito/flutter-action@v2
         with: { channel: stable }
       - run: flutter pub get
-      - run: flutter analyze --no-fatal-infos
-      - run: bash .claude/hooks/check_rules.sh
+      - run: bash .claude/hooks/stop_gate.sh --manual   # rules + analyzer (changed files) + tests, from .claude/gate.conf
         env:
           CHECK_RULES_BASE: origin/${{ github.base_ref }}
-      - run: flutter test --coverage

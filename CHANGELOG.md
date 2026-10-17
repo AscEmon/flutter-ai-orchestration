@@ -2,6 +2,10 @@
 
 Update an installed project: `bash .claude/scripts/update.sh` (v2.2.2+) — or see README → Updating.
 
+## v2.2.3
+- Running the plain install command on an already-installed project now **offers to update** (`Installed v2.2.1 → available v2.2.3 — Update now? [Y/n]`) instead of failing
+- Same version → "Already up to date"; newer installed → refuses to downgrade unless `--force`
+
 ## v2.2.2
 - **Easy updates:** `bash .claude/scripts/update.sh` (latest release, `--check`, or a specific tag) and `get.sh --update`
 - `get.sh` works in an empty folder (creates the Flutter project) — the folder check now lives in `install.sh`

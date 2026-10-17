@@ -2,6 +2,9 @@
 
 Update an installed project: `bash .claude/scripts/update.sh` (v2.2.2+) — or see README → Updating.
 
+## v2.2.4
+- Subagent audit trail: every `test-writer` / `reviewer` (or other subagent) run is logged as `SUBAGENT_START <type> | <task>` and `SUBAGENT_STOP` in `.claude/audit.log` — check with `grep SUBAGENT .claude/audit.log`
+
 ## v2.2.3
 - Running the plain install command on an already-installed project now **offers to update** (`Installed v2.2.1 → available v2.2.3 — Update now? [Y/n]`) instead of failing
 - Same version → "Already up to date"; newer installed → refuses to downgrade unless `--force`

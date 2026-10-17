@@ -11,7 +11,7 @@ Install it with one command. The AI agent then learns how *your* project is buil
 ### ⚡ Install in one line (run inside your Flutter project)
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/AscEmon/flutter-ai-orchestration/v2.2.3/get.sh | bash
+curl -fsSL https://raw.githubusercontent.com/AscEmon/flutter-ai-orchestration/v2.2.4/get.sh | bash
 ```
 
 On first install you choose **which coding pattern the AI should follow** — the installer recommends one based on your project:
@@ -183,7 +183,7 @@ You're asked on the **first** install; upgrades keep your choice. Skip the quest
 - **Retry budget:** 3 attempts (`STOP_GATE_MAX_RETRIES`), then it stops and reports.
 - **Anti-cheating:** deleting tests, adding `skip:`, or adding `// ignore:` fails the gate.
 - **Only what changed:** rules and warnings are checked on changed files only — legacy code doesn't block you.
-- **Audit trail:** every PASS / FAIL / ESCALATED is written to `.claude/audit.log`.
+- **Audit trail:** every PASS / FAIL / ESCALATED and every subagent run (`SUBAGENT_START test-writer | …`) is written to `.claude/audit.log`.
 
 **Definition of Done:** every acceptance criterion has a passing test, the gate is green, and the reviewer passed.
 
@@ -208,14 +208,14 @@ You're asked on the **first** install; upgrades keep your choice. Skip the quest
 
 ```bash
 git add -A && git commit -m "baseline"                        # gates compare against your last commit
-curl -fsSL https://raw.githubusercontent.com/AscEmon/flutter-ai-orchestration/v2.2.3/get.sh | bash                                           # auto-detect everything
-curl -fsSL https://raw.githubusercontent.com/AscEmon/flutter-ai-orchestration/v2.2.3/get.sh | AI_ORCH_STATE=bloc bash                        # force state: riverpod | bloc | custom
-curl -fsSL https://raw.githubusercontent.com/AscEmon/flutter-ai-orchestration/v2.2.3/get.sh | AI_ORCH_PROFILE=generic bash                   # force profile: ssl | generic
-curl -fsSL https://raw.githubusercontent.com/AscEmon/flutter-ai-orchestration/v2.2.3/get.sh | bash -s -- --profile=generic --state=riverpod  # same, flag form (note the -s --)
+curl -fsSL https://raw.githubusercontent.com/AscEmon/flutter-ai-orchestration/v2.2.4/get.sh | bash                                           # auto-detect everything
+curl -fsSL https://raw.githubusercontent.com/AscEmon/flutter-ai-orchestration/v2.2.4/get.sh | AI_ORCH_STATE=bloc bash                        # force state: riverpod | bloc | custom
+curl -fsSL https://raw.githubusercontent.com/AscEmon/flutter-ai-orchestration/v2.2.4/get.sh | AI_ORCH_PROFILE=generic bash                   # force profile: ssl | generic
+curl -fsSL https://raw.githubusercontent.com/AscEmon/flutter-ai-orchestration/v2.2.4/get.sh | bash -s -- --profile=generic --state=riverpod  # same, flag form (note the -s --)
 ```
 
 > ⚠ **`bash: --state=riverpod: invalid option`?** Options after `| bash` need `-s --` first. Easier: use the `AI_ORCH_*` variables, or just `| bash` and answer the prompt.
-> Always use a **version tag** in the URL (`v2.2.3`), never `master`. Prefer to read first? `curl -fsSLO https://raw.githubusercontent.com/AscEmon/flutter-ai-orchestration/v2.2.3/get.sh`, open `get.sh`, then `bash get.sh`. Internal mirror: `AI_ORCH_TARBALL=<url> bash get.sh`.
+> Always use a **version tag** in the URL (`v2.2.4`), never `master`. Prefer to read first? `curl -fsSLO https://raw.githubusercontent.com/AscEmon/flutter-ai-orchestration/v2.2.4/get.sh`, open `get.sh`, then `bash get.sh`. Internal mirror: `AI_ORCH_TARBALL=<url> bash get.sh`.
 
 **Option B — from a local clone** (contributors / offline):
 
@@ -246,7 +246,7 @@ bash .claude/scripts/update.sh v2.2.2     # move to a specific release (also for
 Installed before v2.2.2 (no `update.sh` yet)? Run this once — afterwards `update.sh` is there:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/AscEmon/flutter-ai-orchestration/v2.2.3/get.sh | bash -s -- --update
+curl -fsSL https://raw.githubusercontent.com/AscEmon/flutter-ai-orchestration/v2.2.4/get.sh | bash -s -- --update
 ```
 
 What an update does:
@@ -365,6 +365,7 @@ Both run `stop_gate.sh --manual` — the same rules, analyzer scope and test sco
 |---|---|
 | Gate failures per success | `grep -c "STOP_GATE FAIL" .claude/audit.log` ÷ `grep -c "STOP_GATE PASS" .claude/audit.log` — lower is better |
 | Escalations (agent got stuck) | `grep -c ESCALATED .claude/audit.log` |
+| Subagents actually used | `grep SUBAGENT_START .claude/audit.log` — which subagent ran, for which task |
 | Cost per feature | `/cost` in Claude Code |
 | Quality | bugs found in QA / production per feature, before vs after |
 

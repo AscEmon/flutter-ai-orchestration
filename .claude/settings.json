@@ -75,6 +75,15 @@
             "command": "bash .claude/hooks/pre_edit_guard.sh"
           }
         ]
+      },
+      {
+        "matcher": "Task|Agent",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash .claude/hooks/log_subagent.sh"
+          }
+        ]
       }
     ],
     "PostToolUse": [
@@ -99,6 +108,16 @@
           {
             "type": "command",
             "command": "bash .claude/hooks/on_stop.sh"
+          }
+        ]
+      }
+    ],
+    "SubagentStop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash .claude/hooks/log_subagent.sh --stop"
           }
         ]
       }

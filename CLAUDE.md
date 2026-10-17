@@ -24,6 +24,8 @@ These run automatically on every Claude Code session. They protect the codebase 
 | `PostToolUse` | `Write\|Edit` | `post_write.sh` | Scans the file just written for secret patterns — on a hit exits `2`, so Claude is told to remove it (logged as `SECRET_WRITE_BLOCKED`). Also reminds about asset / `autosafe` / `build_runner` steps. |
 | `Stop` | — | `stop_gate.sh` | **Loop gate.** If `lib/` or `test/` changed, runs `check_rules.sh` → analyzer (errors anywhere, warnings in changed files) → tests (all or related). On failure exits `2` so Claude keeps working with the failure report. Max 3 retries (`STOP_GATE_MAX_RETRIES`), then escalates to you. Scopes in `.claude/gate.conf` / `.claude/gate.local.conf`. |
 | `Stop` | — | `on_stop.sh` | Appends session-end timestamp to `.claude/audit.log` and warns if a secret file is tracked. |
+| `PreToolUse` | `Task\|Agent` | `log_subagent.sh` | Logs every subagent start (`SUBAGENT_START test-writer \| <task>`) to `.claude/audit.log`. Never blocks. |
+| `SubagentStop` | — | `log_subagent.sh --stop` | Logs `SUBAGENT_STOP` when a subagent finishes. |
 
 **Shared library:** `.claude/hooks/_secret_patterns.sh` — single source of secret regexes, sourced by all guard hooks.
 

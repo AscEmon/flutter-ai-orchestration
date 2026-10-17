@@ -5,7 +5,7 @@ Bootstrap this project for the AI-native pipeline. Show the plan first, then do 
 
 1. Verify tools: `flutter --version`, `ssl_cli help --all`, `autosafe --version`. Report anything missing with its install command.
 2. If `test/widget_test.dart` is the default counter test, delete it.
-3. Detect the state management from `pubspec.yaml` (`flutter_riverpod` or `flutter_bloc`) and confirm `.claude/rules/STATE_MANAGEMENT.md` matches it — if not, STOP and tell me to re-run `install.sh --state=<riverpod|bloc> --force`. Add test deps: `flutter pub add --dev mocktail` (+ `bloc_test` for Bloc).
+3. Read the active state management from `.claude/rules/STATE_MANAGEMENT.md`. If its package (`flutter_riverpod` or `flutter_bloc`) is missing from `pubspec.yaml`, add it with `flutter pub add`. If `pubspec.yaml` has the OTHER one, STOP and tell me to re-run the installer with `--state=<riverpod|bloc> --force`. Add test deps: `flutter pub add --dev mocktail` (+ `bloc_test` for Bloc).
 4. `analysis_options.yaml`: keep `flutter_lints` (and `riverpod_lint` if Riverpod), set `avoid_print: true`.
 5. If the project has no logger, add one in `lib/core/utils/` that is silent in release builds and never logs PII (NID, phone, account numbers) or tokens. Replace existing `print()` calls with it.
 6. Confirm `.gitignore` contains every entry listed in `.claude/docs/SECURITY.md` → .gitignore Validation.

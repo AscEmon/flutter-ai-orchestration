@@ -3,12 +3,14 @@
 # get.sh — one-line installer for flutter-ai-orchestration
 #
 # Run inside your Flutter project:
-#   curl -fsSL https://raw.githubusercontent.com/AscEmon/flutter-ai-orchestration/v2.0.0/get.sh | bash
-#   curl -fsSL .../v2.0.0/get.sh | bash -s -- --state=bloc          # force state management
+#   curl -fsSL https://raw.githubusercontent.com/AscEmon/flutter-ai-orchestration/v2.0.1/get.sh | bash
+#   curl -fsSL .../v2.0.1/get.sh | AI_ORCH_STATE=bloc bash          # force state management
+#   curl -fsSL .../v2.0.1/get.sh | bash -s -- --state=bloc          # same thing (note the -s --)
 #   curl -fsSL .../v2.1.0/get.sh | bash -s -- --force               # upgrade (backs up first)
 #
 # Environment overrides:
-#   AI_ORCH_VERSION   release tag to install            (default: v2.0.0)
+#   AI_ORCH_VERSION   release tag to install            (default: v2.0.1)
+#   AI_ORCH_STATE     riverpod | bloc — same as --state (easier with curl | bash)
 #   AI_ORCH_REPO      GitHub owner/repo                 (default: AscEmon/flutter-ai-orchestration)
 #   AI_ORCH_TARBALL   full tarball URL (e.g. an internal GitLab mirror) — overrides the two above
 #
@@ -16,7 +18,7 @@
 # ============================================================
 set -euo pipefail
 
-VERSION="${AI_ORCH_VERSION:-v2.0.0}"
+VERSION="${AI_ORCH_VERSION:-v2.0.1}"
 REPO="${AI_ORCH_REPO:-AscEmon/flutter-ai-orchestration}"
 TARBALL="${AI_ORCH_TARBALL:-https://github.com/${REPO}/archive/refs/tags/${VERSION}.tar.gz}"
 

@@ -11,10 +11,21 @@ Drop it into any Flutter project with one command. The AI agent then knows your 
 ### ⚡ Install in one line (run inside your Flutter project)
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/AscEmon/flutter-ai-orchestration/v2.0.0/get.sh | bash
+curl -fsSL https://raw.githubusercontent.com/AscEmon/flutter-ai-orchestration/v2.0.1/get.sh | bash
 ```
 
-State management (Riverpod / Bloc) is detected from `pubspec.yaml`. Force it with `| bash -s -- --state=bloc`. [More options ↓](#install-into-a-project)
+State management (Riverpod / Bloc) is detected from `pubspec.yaml` — or you're asked to pick 1 / 2. [More options ↓](#install-into-a-project)
+
+**Brand-new app — the whole process:**
+
+```bash
+ssl_cli create my_app          # pattern 4 → 1 Riverpod / 2 Bloc
+cd my_app && git init
+curl -fsSL https://raw.githubusercontent.com/AscEmon/flutter-ai-orchestration/v2.0.1/get.sh | bash
+claude                          # then: /bootstrap
+```
+
+`ssl_cli create` writes the v1 AI docs; the installer detects them and upgrades to v2 automatically (backup kept in `.ai-orchestration-backup/`).
 
 ---
 
@@ -158,12 +169,15 @@ You don't write long prompts. Slash commands in `.claude/commands/` are reusable
 
 ```bash
 cd my_flutter_app && git init                       # if it's not a git repo yet
-curl -fsSL https://raw.githubusercontent.com/AscEmon/flutter-ai-orchestration/v2.0.0/get.sh | bash                              # auto-detect Riverpod / Bloc
-curl -fsSL https://raw.githubusercontent.com/AscEmon/flutter-ai-orchestration/v2.0.0/get.sh | bash -s -- --state=bloc           # or force: riverpod | bloc
+curl -fsSL https://raw.githubusercontent.com/AscEmon/flutter-ai-orchestration/v2.0.1/get.sh | bash                              # auto-detect Riverpod / Bloc
+curl -fsSL https://raw.githubusercontent.com/AscEmon/flutter-ai-orchestration/v2.0.1/get.sh | AI_ORCH_STATE=bloc bash      # force: riverpod | bloc
+curl -fsSL https://raw.githubusercontent.com/AscEmon/flutter-ai-orchestration/v2.0.1/get.sh | bash -s -- --state=bloc     # same, flag form
 ```
 
-> Always use a **version tag** in the URL (`v2.0.0`), never `master` — everyone gets the exact same files.
-> Prefer to read before running? `curl -fsSLO https://raw.githubusercontent.com/AscEmon/flutter-ai-orchestration/v2.0.0/get.sh`, open `get.sh`, then `bash get.sh`.
+> ⚠ **`bash: --state=riverpod: invalid option`?** Options after `| bash` need `-s --` first (`| bash -s -- --state=riverpod`). Easier: use `| AI_ORCH_STATE=riverpod bash`, or just `| bash` and pick 1 / 2 when asked.
+
+> Always use a **version tag** in the URL (`v2.0.1`), never `master` — everyone gets the exact same files.
+> Prefer to read before running? `curl -fsSLO https://raw.githubusercontent.com/AscEmon/flutter-ai-orchestration/v2.0.1/get.sh`, open `get.sh`, then `bash get.sh`.
 > Behind a firewall / internal mirror: `AI_ORCH_TARBALL=<mirror-tarball-url> bash get.sh`.
 
 **Option B — from a local clone** (for contributors or offline use):

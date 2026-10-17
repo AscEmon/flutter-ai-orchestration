@@ -3,7 +3,7 @@
 # install.sh — install (or upgrade) flutter-ai-orchestration into a Flutter project
 #
 # Usage:
-#   ./install.sh /path/to/flutter_project                        # auto-detect profile + state management
+#   ./install.sh /path/to/flutter_project                        # first install: asks which coding pattern (ssl_cli or your own)
 #   ./install.sh /path/to/flutter_project --force                # upgrade (backs up first)
 #   ./install.sh /path/to/flutter_project --profile=generic      # ssl | generic
 #   ./install.sh /path/to/flutter_project --state=bloc           # riverpod | bloc | custom
@@ -52,15 +52,67 @@ ask_tty() {  # ask_tty "prompt" → echoes answer ('' when no terminal, e.g. CI)
     echo "$ans"
 }
 
+if { exec 3</dev/tty; } 2>/dev/null; then HAS_TTY=1; exec 3<&-; else HAS_TTY=0; fi
+
 # ── Profile ───────────────────────────────────────────────
-if [ -z "$PROFILE" ]; then
-    if [ -n "$OLD_PROFILE" ]; then PROFILE="$OLD_PROFILE"
-    elif has_dep autosafe_json || [ -f "$DEST/lib/core/presentation/widgets/global_text.dart" ] \
-         || grep -qs "orchestration v1" "$DEST/CLAUDE.md"; then PROFILE="ssl"
-    else PROFILE="generic"; fi
+SSL_CLI_URL="https://pub.dev/packages/ssl_cli"
+AUTOSAFE_URL="https://pub.dev/packages/autosafe_json"
+if [ -z "$PROFILE" ] && [ -n "$OLD_PROFILE" ]; then
+    PROFILE="$OLD_PROFILE"
+    echo "• Profile: $PROFILE (from previous install — use --profile=ssl|generic to change)"
+elif [ -z "$PROFILE" ]; then
+    # Recommend based on what the project looks like, but let the developer decide.
+    if has_dep autosafe_json || [ -f "$DEST/lib/core/presentation/widgets/global_text.dart" ] \
+       || grep -qs "orchestration v1" "$DEST/CLAUDE.md"; then
+        REC=1; REC_WHY="this project looks like it was created with ssl_cli"
+    else
+        REC=2; REC_WHY="no ssl_cli project structure found"
+    fi
+    cat >&2 <<MENU
+
+  ┌────────────────────────────────────────────────────────────────────┐
+  │  Which coding pattern should the AI agent follow in this project?  │
+  └────────────────────────────────────────────────────────────────────┘
+
+  1) ssl_cli pattern — Clean Architecture scaffolded by ssl_cli
+       • Feature modules generated with:  ssl_cli module <name>
+       • Global widgets (GlobalText, GlobalButton, GlobalAppBar…), flutter_screenutil
+       • Safe JSON with autosafe_json (SafeJson.as*), Either<Failure, T>, GetIt DI, envied secrets
+       • Riverpod or Bloc
+       Learn the pattern:  $SSL_CLI_URL
+                           $AUTOSAFE_URL
+       Best for: new apps created with 'ssl_cli create', or projects already using it.
+
+  2) Your own pattern (generic) — any architecture, any state management
+       • MVC, MVVM, Clean Architecture, feature-first or layer-first…
+       • Riverpod, Bloc, Provider, GetX, MobX…
+       • The AI learns YOUR conventions from your code (/bootstrap) and you review them.
+       Best for: existing projects and teams that don't use ssl_cli.
+
+  Recommended: $REC  ($REC_WHY)
+MENU
+    if [ "$HAS_TTY" = 0 ]; then
+        echo "  (no terminal — using the recommendation; pass --profile=ssl|generic to choose)" >&2
+        ans=""
+    fi
+    for _try in 1 2 3; do
+        [ "$HAS_TTY" = 1 ] && ans=$(ask_tty "  Choose 1 or 2 [Enter = $REC]: ")
+        case "${ans:-$REC}" in
+            1|ssl)     PROFILE="ssl"; break ;;
+            2|generic) PROFILE="generic"; break ;;
+            *) echo "  Please type 1 or 2." >&2; [ "$HAS_TTY" = 1 ] || break ;;
+        esac
+    done
+    [ -n "$PROFILE" ] || { echo "✖ No valid choice. Re-run and choose 1 or 2 (or pass --profile=ssl|generic)"; exit 1; }
+    echo "• Profile: $PROFILE"
+else
+    echo "• Profile: $PROFILE"
 fi
 [ -d "$SRC/profiles/$PROFILE" ] || { echo "✖ Unknown profile '$PROFILE' (available: $(ls "$SRC/profiles" | tr '\n' ' '))"; exit 1; }
-echo "• Profile: $PROFILE"
+if [ "$PROFILE" = "ssl" ]; then
+    command -v ssl_cli >/dev/null 2>&1 || echo "  ℹ ssl_cli not installed — dart pub global activate ssl_cli   ($SSL_CLI_URL)"
+    command -v autosafe >/dev/null 2>&1 || echo "  ℹ autosafe not installed — dart pub global activate autosafe_json   ($AUTOSAFE_URL)"
+fi
 
 # ── State management ──────────────────────────────────────
 STATE_PKG=""
@@ -187,7 +239,9 @@ chmod +x "$DEST"/.claude/hooks/*.sh "$DEST"/.claude/scripts/*.sh
 
 # ── Hints ─────────────────────────────────────────────────
 if [ "$PROFILE" = "ssl" ] && [ ! -d "$DEST/lib/core" ]; then
-    echo "⚠ lib/core not found — the ssl profile expects an ssl_cli project. Not one? Re-run with --profile=generic --force"
+    echo "⚠ lib/core not found — the ssl profile expects a project created by ssl_cli ($SSL_CLI_URL)."
+    echo "    New app?      ssl_cli create <name>  (pattern 4), then run this installer inside it."
+    echo "    Existing app? Re-run with --profile=generic --force to use your own pattern."
 fi
 case "$STATE" in
     bloc)     has_dep flutter_bloc || echo "⚠ flutter_bloc is not in pubspec.yaml yet — run: flutter pub add flutter_bloc  (or let /bootstrap do it)" ;;

@@ -152,12 +152,13 @@ Anything outside this list will trigger a permission prompt. `python3:*` and `ba
 
 Claude Code auto-includes every `.md` file in this folder. `install.sh` fills it from `profiles/<profile>/`:
 
-| File | ssl profile | generic profile |
-|------|-------------|-----------------|
-| `PROJECT_CONVENTIONS.md` | Mobile Team house style (managed) | **Learned from your code** by `/bootstrap` — yours to edit, kept on upgrade |
-| `STATE_MANAGEMENT.md` | ssl_cli Riverpod / Bloc templates | Neutral Riverpod / Bloc guide, or learned (`custom`) for Provider, GetX, MobX… |
-| `ARCHITECTURE.md`, `CLI_WORKFLOW.md`, `CODE_TEMPLATES.md`, `UI_RULES.md` | ✔ | — |
-| `PROJECT_NOTES.md` (optional) | your own additions — never touched by the installer | same |
+| File | ssl profile | ssl-repository profile | generic profile |
+|------|-------------|------------------------|-----------------|
+| `PROJECT_CONVENTIONS.md` | Mobile Team Clean Architecture (managed) | ssl_cli Repository/Bloc `lib/modules/…` structure (managed); differences → `PROJECT_NOTES.md` | **Learned from your code** by `/bootstrap` — yours to edit, kept on upgrade |
+| `STATE_MANAGEMENT.md` | ssl_cli Riverpod / Bloc templates | Neutral Riverpod / Bloc guide, or learned (`custom`) | Neutral Riverpod / Bloc guide, or learned (`custom`) for Provider, GetX, MobX… |
+| `ARCHITECTURE.md`, `CLI_WORKFLOW.md`, `CODE_TEMPLATES.md`, `UI_RULES.md` | ✔ | in `.claude/migration/target/` (for `/migrate` only) | — |
+| `/migrate` command | — | ✔ resumable module-by-module move to Clean Architecture | — |
+| `PROJECT_NOTES.md` (optional) | your own additions — never touched by the installer | written by `/bootstrap`: how this project differs from the template | same |
 
 Gate settings: `.claude/gate.conf` (profile, managed) + `.claude/gate.local.conf` (your overrides: `EXTRA_BANNED_PATTERNS`, `REQUIRE_TESTS_FOR`, `ANALYZE_SCOPE`, `TEST_SCOPE`).
 

@@ -26,7 +26,7 @@ STATE="${AI_ORCH_STATE:-}"
 PROFILE="${AI_ORCH_PROFILE:-}"
 YES="${AI_ORCH_YES:-0}"
 PROFILE_FROM_MENU=0; CREATED_FLUTTER=0; SSL_CREATED=0
-[ -n "$DEST" ] || { echo "Usage: ./install.sh /path/to/flutter_project [--force] [--profile=ssl|generic] [--state=riverpod|bloc|custom]"; exit 1; }
+[ -n "$DEST" ] || { echo "Usage: ./install.sh /path/to/flutter_project [--force] [--profile=ssl|ssl-repository|generic] [--state=riverpod|bloc|custom]"; exit 1; }
 shift
 for arg in "$@"; do
     case "$arg" in
@@ -108,6 +108,13 @@ fi
 IS_SSL=0
 if has_dep autosafe_json || [ -f "$DEST/lib/core/presentation/widgets/global_text.dart" ] \
    || grep -qs "orchestration v1" "$DEST/CLAUDE.md"; then IS_SSL=1; fi
+# ssl_cli Repository (pattern 2) / Bloc (pattern 3) layout: lib/modules/<m>/repository/<m>_interface.dart + global widgets
+IS_SSL_REPO=0
+if [ "$IS_SSL" = 0 ] && [ -d "$DEST/lib/modules" ] \
+   && { ls "$DEST"/lib/modules/*/repository/*_interface.dart >/dev/null 2>&1 \
+        || { [ -f "$DEST/lib/global/widget/global_text.dart" ] && [ -f "$DEST/lib/data_provider/api_client.dart" ]; }; }; then
+    IS_SSL_REPO=1
+fi
 
 
 # ── Profile ───────────────────────────────────────────────
@@ -115,11 +122,13 @@ SSL_CLI_URL="https://pub.dev/packages/ssl_cli"
 AUTOSAFE_URL="https://pub.dev/packages/autosafe_json"
 if [ -z "$PROFILE" ] && [ -n "$OLD_PROFILE" ]; then
     PROFILE="$OLD_PROFILE"
-    echo "• Profile: $PROFILE (from previous install — use --profile=ssl|generic to change)"
+    echo "• Profile: $PROFILE (from previous install — use --profile=ssl|ssl-repository|generic to change)"
 elif [ -z "$PROFILE" ]; then
     # Recommend based on what the project looks like, but let the developer decide.
     if [ "$IS_SSL" = 1 ]; then
         REC=1; REC_WHY="this project was created with ssl_cli"
+    elif [ "$IS_SSL_REPO" = 1 ]; then
+        REC=1; REC_WHY="this project was created with ssl_cli (Repository / Bloc pattern — lib/modules/…)"
     elif [ "$IS_NEW" = 1 ]; then
         REC=1; REC_WHY="new project — ssl_cli generates a ready-made Clean Architecture structure for you"
     else
@@ -139,6 +148,8 @@ elif [ -z "$PROFILE" ]; then
        Learn the pattern:  $SSL_CLI_URL
                            $AUTOSAFE_URL
        Best for: NEW apps (I'll run 'ssl_cli create' for you) or projects already created with ssl_cli.
+       Older ssl_cli Repository / Bloc-pattern projects (lib/modules/…) are recognised too:
+       the rules then match THAT structure, and /migrate moves it to Clean Architecture step by step.
 
   2) Your own pattern (generic) — any architecture, any state management
        • MVC, MVVM, Clean Architecture, feature-first or layer-first…
@@ -149,7 +160,7 @@ elif [ -z "$PROFILE" ]; then
   Recommended: $REC  ($REC_WHY)
 MENU
     if [ "$HAS_TTY" = 0 ]; then
-        echo "  (no terminal — using the recommendation; pass --profile=ssl|generic to choose)" >&2
+        echo "  (no terminal — using the recommendation; pass --profile=ssl|ssl-repository|generic to choose)" >&2
         ans=""
     fi
     for _try in 1 2 3; do
@@ -160,13 +171,18 @@ MENU
             *) echo "  Please type 1 or 2." >&2; [ "$HAS_TTY" = 1 ] || break ;;
         esac
     done
-    [ -n "$PROFILE" ] || { echo "✖ No valid choice. Re-run and choose 1 or 2 (or pass --profile=ssl|generic)"; exit 1; }
+    [ -n "$PROFILE" ] || { echo "✖ No valid choice. Re-run and choose 1 or 2 (or pass --profile=ssl|ssl-repository|generic)"; exit 1; }
     echo "• Profile: $PROFILE"
 else
     echo "• Profile: $PROFILE"
 fi
+if [ "$PROFILE" = "ssl" ] && [ "$IS_SSL_REPO" = 1 ] && [ "$PROFILE_FROM_MENU" = 1 ]; then
+    PROFILE="ssl-repository"
+    echo "• ssl_cli Repository / Bloc pattern detected (lib/modules/…) → profile: ssl-repository"
+    echo "  Rules describe this project's current structure. To move it to Clean Architecture later: /migrate"
+fi
 [ -d "$SRC/profiles/$PROFILE" ] || { echo "✖ Unknown profile '$PROFILE' (available: $(ls "$SRC/profiles" | tr '\n' ' '))"; exit 1; }
-if [ "$PROFILE" = "ssl" ]; then
+if [ "$PROFILE" = "ssl" ] || [ "$PROFILE" = "ssl-repository" ]; then
     command -v ssl_cli >/dev/null 2>&1 || echo "  ℹ ssl_cli not installed — dart pub global activate ssl_cli   ($SSL_CLI_URL)"
     command -v autosafe >/dev/null 2>&1 || echo "  ℹ autosafe not installed — dart pub global activate autosafe_json   ($AUTOSAFE_URL)"
 fi
@@ -243,25 +259,26 @@ if [ -z "$STATE" ]; then
         for p in provider get mobx flutter_mobx stacked flutter_redux signals; do
             if has_dep "$p"; then STATE_PKG="$p"; break; fi
         done
-        if [ -n "$STATE_PKG" ] && [ "$PROFILE" = "generic" ]; then
+        if [ -n "$STATE_PKG" ] && [ "$PROFILE" != "ssl" ]; then
             STATE="custom"
         else
             echo "• No flutter_bloc / flutter_riverpod in pubspec.yaml."
-            extra=""; [ "$PROFILE" = "generic" ] && extra="    3 for Other / learn from the code\n"
+            extra=""; [ "$PROFILE" != "ssl" ] && extra="    3 for Other / learn from the code\n"
             ans=$(ask_tty "$(printf "  Select state management\n    1 for Riverpod\n    2 for Bloc\n${extra}  > ")")
             case "$ans" in
                 1|riverpod) STATE="riverpod" ;;
                 2|bloc)     STATE="bloc" ;;
-                3|custom)   [ "$PROFILE" = "generic" ] && STATE="custom" ;;
+                3|custom)   [ "$PROFILE" != "ssl" ] && STATE="custom" ;;
             esac
             if [ -z "$STATE" ]; then
-                if [ "$PROFILE" = "generic" ]; then STATE="custom"
+                if [ "$PROFILE" != "ssl" ]; then STATE="custom"
                 else echo "✖ No state management chosen. Re-run with --state=riverpod or --state=bloc"; exit 1; fi
             fi
         fi
     fi
 fi
 STATE_PACK="$SRC/profiles/$PROFILE/state-management/$STATE.md"
+[ -f "$STATE_PACK" ] || STATE_PACK="$SRC/profiles/generic/state-management/$STATE.md"   # profiles may reuse the neutral packs
 [ -f "$STATE_PACK" ] || { echo "✖ State management '$STATE' is not available for profile '$PROFILE' (available: $(ls "$SRC/profiles/$PROFILE/state-management" | sed 's/\.md$//' | tr '\n' ' '))"; exit 1; }
 echo "• State management: $STATE${STATE_PKG:+ ($STATE_PKG)}"
 
@@ -332,8 +349,9 @@ echo "• Core: AGENTS.md, CLAUDE.md, .mcp.json, .claude/ (hooks, agents, comman
 
 # ── 2. Profile files ──────────────────────────────────────
 P="$SRC/profiles/$PROFILE"
-for kind in rules skills; do
+for kind in rules skills commands; do
     [ -d "$P/$kind" ] || continue
+    mkdir -p "$DEST/.claude/$kind"
     for f in "$P/$kind"/*; do
         name=$(basename "$f")
         [ "$kind/$name" = "rules/PROJECT_CONVENTIONS.md" ] && continue
@@ -345,7 +363,8 @@ cp "$P/gate.conf" "$DEST/.claude/gate.conf"; NEW_MANIFEST+=(".claude/gate.conf")
 # learned files are preserved unless still placeholders, or the profile changed
 write_learned() {  # write_learned <src> <dest> [sed-expr]
     local src="$1" dst="$2" expr="${3:-}"
-    if [ "$PROFILE" = "ssl" ] || [ ! -f "$dst" ] || grep -q "$UNLEARNED" "$dst" \
+    if { [ "$PROFILE" != "generic" ] && [ "$(basename "$dst")" = "PROJECT_CONVENTIONS.md" ]; } \
+       || { [ "$PROFILE" = "ssl" ]; } || [ ! -f "$dst" ] || grep -q "$UNLEARNED" "$dst" \
        || { [ -n "$OLD_PROFILE" ] && [ "$OLD_PROFILE" != "$PROFILE" ]; } \
        || { [ "$(basename "$dst")" = "STATE_MANAGEMENT.md" ] && [ "$STATE" != "custom" ]; } \
        || { [ "$(basename "$dst")" = "STATE_MANAGEMENT.md" ] && [ -n "$OLD_STATE" ] && [ "$OLD_STATE" != "$STATE" ]; }; then
@@ -358,6 +377,33 @@ write_learned() {  # write_learned <src> <dest> [sed-expr]
 write_learned "$P/rules/PROJECT_CONVENTIONS.md" "$DEST/.claude/rules/PROJECT_CONVENTIONS.md"
 write_learned "$STATE_PACK" "$DEST/.claude/rules/STATE_MANAGEMENT.md" "s/__STATE_PKG__/${STATE_PKG:-none}/"
 NEW_MANIFEST+=(".claude/rules/PROJECT_CONVENTIONS.md" ".claude/rules/STATE_MANAGEMENT.md")
+if [ "$PROFILE" = "ssl-repository" ]; then
+    # Target (Clean Architecture) conventions for /migrate — NOT auto-loaded, so they never compete with today's rules
+    T="$DEST/.claude/migration/target"; mkdir -p "$T/state-management"
+    for f in "$SRC"/profiles/ssl/rules/*.md "$SRC"/profiles/ssl/skills/*.md; do
+        cp "$f" "$T/"; NEW_MANIFEST+=(".claude/migration/target/$(basename "$f")")
+    done
+    for f in "$SRC"/profiles/ssl/state-management/*.md; do
+        cp "$f" "$T/state-management/"; NEW_MANIFEST+=(".claude/migration/target/state-management/$(basename "$f")")
+    done
+    cat > "$T/README.md" <<'TREADME'
+# Migration target — ssl_cli Clean Architecture
+
+Used only by `/migrate`. These files describe the structure the project is moving TO.
+Inside them, paths refer to their installed locations after migration:
+
+| Mentioned as | Here |
+|---|---|
+| `.claude/rules/PROJECT_CONVENTIONS.md`, `ARCHITECTURE.md`, `CODE_TEMPLATES.md`, `UI_RULES.md` | `.claude/migration/target/<same name>` |
+| `.claude/skills/clean_architecture_pattern.md` | `.claude/migration/target/clean_architecture_pattern.md` |
+| `.claude/rules/STATE_MANAGEMENT.md` | `.claude/migration/target/state-management/riverpod.md` or `bloc.md` (chosen in the migration state file) |
+
+After the migration is finished, switch the project's live rules with:
+`curl -fsSL https://raw.githubusercontent.com/AscEmon/flutter-ai-orchestration/<tag>/get.sh | bash -s -- --profile=ssl --force`
+TREADME
+    NEW_MANIFEST+=(".claude/migration/target/README.md")
+    echo "• Migration target docs → .claude/migration/target/ (used by /migrate)"
+fi
 echo "• Profile '$PROFILE': .claude/rules/, .claude/skills/, .claude/gate.conf"
 
 VERSION_TAG="${AI_ORCH_VERSION:-$(git -C "$SRC" describe --tags --always 2>/dev/null || echo dev)}"
@@ -418,7 +464,7 @@ else
 fi
 
 # ── 5. Tool check (informational) ─────────────────────────
-TOOLS="flutter dart claude flutter-skill"; [ "$PROFILE" = "ssl" ] && TOOLS="flutter dart ssl_cli autosafe claude flutter-skill"
+TOOLS="flutter dart claude flutter-skill"; [ "$PROFILE" != "generic" ] && TOOLS="flutter dart ssl_cli autosafe claude flutter-skill"
 echo ""; echo "Tool check:"
 for t in $TOOLS; do
     if command -v "$t" >/dev/null 2>&1; then echo "  ✔ $t"
@@ -429,7 +475,10 @@ done
 echo ""; echo "Done. Next steps:"
 echo "  1. cd \"$DEST\""
 echo "  2. git add -A && git commit -m \"chore: add AI orchestration\"   # gates compare against this baseline"
-if [ "$PROFILE" = "ssl" ]; then
+if [ "$PROFILE" = "ssl-repository" ]; then
+    echo "  3. claude   → /bootstrap   (checks the ssl_cli Repository-pattern rules against your code, notes differences)"
+    echo "  4. then: /spec <feature> …   — or /migrate to move the project to Clean Architecture module by module"
+elif [ "$PROFILE" = "ssl" ]; then
     echo "  3. cp .env.example .env && sh .claude/scripts/setup_secrets.sh   # real values from the team vault — never paste them into the AI"
     echo "  4. claude   → /bootstrap   then   /spec <feature> <Figma / BRD / description>"
 else

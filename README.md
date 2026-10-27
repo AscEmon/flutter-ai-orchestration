@@ -11,7 +11,7 @@ Install it with one command. The AI agent then learns how *your* project is buil
 ### ⚡ Install in one line (run inside your Flutter project)
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/AscEmon/flutter-ai-orchestration/v2.2.4/get.sh | bash
+curl -fsSL https://raw.githubusercontent.com/AscEmon/flutter-ai-orchestration/v2.3.0/get.sh | bash
 ```
 
 On first install you choose **which coding pattern the AI should follow** — the installer recommends one based on your project:
@@ -84,21 +84,24 @@ AI coding agents are fast, but out of the box they:
 CORE (every project)      loop gate · test integrity · /spec /feature /qa_test /bootstrap · subagents · security hooks · CI
    +
 PROFILE                   ssl      → Mobile Team house style (ssl_cli, Global widgets, SafeJson, GetIt, envied)
+                          ssl-repository → existing ssl_cli Repository / Bloc-pattern project (lib/modules/…) + /migrate
                           generic  → ANY project: conventions are learned from your code by /bootstrap
    +
 STATE MANAGEMENT          riverpod · bloc · custom (Provider, GetX, MobX, Redux, Signals… learned from your code)
 ```
 
-| | **ssl** profile | **generic** profile |
-|---|---|---|
-| Choose it when | your project is (or will be) created with [ssl_cli](https://pub.dev/packages/ssl_cli) and follows its pattern | you have your own architecture, or don't use ssl_cli |
-| Recommended automatically when | `autosafe_json` in pubspec, `lib/core/presentation/widgets/global_text.dart`, or ssl_cli's v1 AI docs | everything else |
-| `PROJECT_CONVENTIONS.md` | Mobile Team rules (managed) | **written by `/bootstrap` from your code**, reviewed by you, kept on upgrades |
-| `STATE_MANAGEMENT.md` | ssl_cli Riverpod / Bloc templates | neutral Riverpod / Bloc guide — or learned (`custom`) for anything else |
-| Banned patterns in the gate | raw `Text(`/`AppBar(`…, raw casts, hardcoded colors, `print(`, dotenv | only `print(` — plus any project-widget rules you approve in `/bootstrap` |
-| New Feature Checklist | `ssl_cli module` → SafeJson → DI | learned: "add a feature the way this codebase does it" |
+| | **ssl** profile | **ssl-repository** profile | **generic** profile |
+|---|---|---|---|
+| Choose it when | project is (or will be) created with [ssl_cli](https://pub.dev/packages/ssl_cli) **Clean Architecture** (pattern 4) | project was created with ssl_cli's **Repository** (2) or **Bloc** (3) pattern — `lib/modules/<m>/repository/…` | your own architecture, or no ssl_cli |
+| Recommended automatically when | `autosafe_json` in pubspec, `lib/core/presentation/widgets/global_text.dart`, or ssl_cli's v1 AI docs | `lib/modules/*/repository/*_interface.dart`, or `lib/global/widget/global_text.dart` + `lib/data_provider/api_client.dart` (you pick **1**) | everything else |
+| `PROJECT_CONVENTIONS.md` | Clean Architecture rules (managed) | Repository-pattern rules: `lib/modules`, `ApiClient`, `Global*` widgets, `KColor`, `ViewUtil` (managed) — real-code differences go to `PROJECT_NOTES.md` via `/bootstrap` | **written by `/bootstrap` from your code** |
+| `STATE_MANAGEMENT.md` | ssl_cli Riverpod / Bloc templates | Bloc guide if `flutter_bloc` is used, otherwise learned (`custom`) from your controllers | neutral guide or learned (`custom`) |
+| Banned patterns in the gate | raw `Text(`/`AppBar(`…, raw casts, hardcoded colors, `print(`, dotenv | raw `Text(`/`AppBar(`…, `Color(0x`, `Image.asset(`, `showSnackBar(`, `print(` — in `lib/modules` | only `print(` + what you approve |
+| Tests required for | usecases, repositories, notifiers/blocs | `*_controller`, `*_repository`, `*_bloc`, `*_cubit`, `*_notifier`, `*_provider` | learned |
+| New Feature Checklist | `ssl_cli module` → SafeJson → DI | `ssl_cli module <name>` → **2 Others** (or **1 Bloc**) → api / interface / repository → controller → views | learned |
+| Extra | — | **`/migrate`** — resumable, module-by-module move to Clean Architecture; target rules in `.claude/migration/target/` | — |
 
-You're asked on the **first** install; upgrades keep your choice. Skip the question with `--profile=ssl|generic` (or `AI_ORCH_PROFILE`). Without a terminal (CI) nothing is created or installed on its own — pass `--yes` (or `AI_ORCH_YES=1`) together with `--profile` and `--state`. State: `--state=riverpod|bloc|custom` (or `AI_ORCH_STATE`).
+You're asked on the **first** install; upgrades keep your choice. Skip the question with `--profile=ssl|ssl-repository|generic` (or `AI_ORCH_PROFILE`). Without a terminal (CI) nothing is created or installed on its own — pass `--yes` (or `AI_ORCH_YES=1`) together with `--profile` and `--state`. State: `--state=riverpod|bloc|custom` (or `AI_ORCH_STATE`).
 
 **ssl_cli resources:** [ssl_cli on pub.dev](https://pub.dev/packages/ssl_cli) (scaffolding, Clean Architecture modules, Riverpod/Bloc) · [autosafe_json on pub.dev](https://pub.dev/packages/autosafe_json) (safe JSON parsing).
 
@@ -208,14 +211,14 @@ You're asked on the **first** install; upgrades keep your choice. Skip the quest
 
 ```bash
 git add -A && git commit -m "baseline"                        # gates compare against your last commit
-curl -fsSL https://raw.githubusercontent.com/AscEmon/flutter-ai-orchestration/v2.2.4/get.sh | bash                                           # auto-detect everything
-curl -fsSL https://raw.githubusercontent.com/AscEmon/flutter-ai-orchestration/v2.2.4/get.sh | AI_ORCH_STATE=bloc bash                        # force state: riverpod | bloc | custom
-curl -fsSL https://raw.githubusercontent.com/AscEmon/flutter-ai-orchestration/v2.2.4/get.sh | AI_ORCH_PROFILE=generic bash                   # force profile: ssl | generic
-curl -fsSL https://raw.githubusercontent.com/AscEmon/flutter-ai-orchestration/v2.2.4/get.sh | bash -s -- --profile=generic --state=riverpod  # same, flag form (note the -s --)
+curl -fsSL https://raw.githubusercontent.com/AscEmon/flutter-ai-orchestration/v2.3.0/get.sh | bash                                           # auto-detect everything
+curl -fsSL https://raw.githubusercontent.com/AscEmon/flutter-ai-orchestration/v2.3.0/get.sh | AI_ORCH_STATE=bloc bash                        # force state: riverpod | bloc | custom
+curl -fsSL https://raw.githubusercontent.com/AscEmon/flutter-ai-orchestration/v2.3.0/get.sh | AI_ORCH_PROFILE=generic bash                   # force profile: ssl | ssl-repository | generic
+curl -fsSL https://raw.githubusercontent.com/AscEmon/flutter-ai-orchestration/v2.3.0/get.sh | bash -s -- --profile=generic --state=riverpod  # same, flag form (note the -s --)
 ```
 
 > ⚠ **`bash: --state=riverpod: invalid option`?** Options after `| bash` need `-s --` first. Easier: use the `AI_ORCH_*` variables, or just `| bash` and answer the prompt.
-> Always use a **version tag** in the URL (`v2.2.4`), never `master`. Prefer to read first? `curl -fsSLO https://raw.githubusercontent.com/AscEmon/flutter-ai-orchestration/v2.2.4/get.sh`, open `get.sh`, then `bash get.sh`. Internal mirror: `AI_ORCH_TARBALL=<url> bash get.sh`.
+> Always use a **version tag** in the URL (`v2.3.0`), never `master`. Prefer to read first? `curl -fsSLO https://raw.githubusercontent.com/AscEmon/flutter-ai-orchestration/v2.3.0/get.sh`, open `get.sh`, then `bash get.sh`. Internal mirror: `AI_ORCH_TARBALL=<url> bash get.sh`.
 
 **Option B — from a local clone** (contributors / offline):
 
@@ -246,7 +249,7 @@ bash .claude/scripts/update.sh v2.2.2     # move to a specific release (also for
 Installed before v2.2.2 (no `update.sh` yet)? Run this once — afterwards `update.sh` is there:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/AscEmon/flutter-ai-orchestration/v2.2.4/get.sh | bash -s -- --update
+curl -fsSL https://raw.githubusercontent.com/AscEmon/flutter-ai-orchestration/v2.3.0/get.sh | bash -s -- --update
 ```
 
 What an update does:
@@ -273,6 +276,20 @@ It is designed to drop into a codebase that already exists — MVC, MVVM, Clean 
 | `print()` everywhere | Only *new or changed* files are checked — old code is listed as tech debt, not mass-rewritten |
 | Your own widgets (`AppText`, `PrimaryButton`…) | `/bootstrap` proposes `EXTRA_BANNED_PATTERNS` (e.g. raw `Text(` → `AppText`) for `.claude/gate.local.conf` — applied only after you approve |
 | GetX / Provider / MobX / custom | State is `custom`: `/bootstrap` documents the real pattern in `STATE_MANAGEMENT.md` |
+
+### Existing ssl_cli Repository / Bloc-pattern project
+
+Projects created with older ssl_cli patterns (`lib/modules/<m>/controller|repository|views`) are detected automatically → answer **1** → profile **ssl-repository**.
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/AscEmon/flutter-ai-orchestration/v2.3.0/get.sh | bash                                   # pick 1
+# already installed as generic? switch:
+curl -fsSL https://raw.githubusercontent.com/AscEmon/flutter-ai-orchestration/v2.3.0/get.sh | bash -s -- --profile=ssl-repository --force
+```
+
+Then in Claude Code: `/bootstrap` (verifies the rules against your code, writes `.claude/rules/PROJECT_NOTES.md`, measures the gate) → `/feature …` builds new features **in the existing Repository pattern**.
+
+**Moving to Clean Architecture?** `/migrate` runs a resumable, module-by-module migration (analysis → security/native foundation → auth → dashboard → … → full verification) with zero business-logic change, characterization tests before every refactor, a `docs/migration/MIGRATION_STATE.md` the agent resumes from each day, and a human sign-off per module. After the last module, switch the rules with `--profile=ssl --force`.
 
 ---
 
@@ -325,6 +342,10 @@ flutter-ai-orchestration/
     │   ├── rules/            ← PROJECT_CONVENTIONS · ARCHITECTURE · CLI_WORKFLOW · CODE_TEMPLATES · UI_RULES
     │   ├── skills/           ← clean_architecture_pattern.md
     │   ├── state-management/ ← riverpod.md · bloc.md
+    │   └── gate.conf
+    ├── ssl-repository/       ← existing ssl_cli Repository / Bloc-pattern projects
+    │   ├── rules/            ← PROJECT_CONVENTIONS (lib/modules pattern)
+    │   ├── commands/         ← migrate.md (/migrate → Clean Architecture)
     │   └── gate.conf
     └── generic/              ← any Flutter project
         ├── rules/            ← PROJECT_CONVENTIONS (placeholder → learned by /bootstrap)
@@ -414,7 +435,9 @@ EXTRA_BANNED_PATTERNS='
 
 ## ❓ Limitations & FAQ
 
-**Does it depend on `ssl_cli`?** No. `ssl_cli` is only used by the **ssl** profile. Every other project uses the **generic** profile.
+**Does it depend on `ssl_cli`?** No. `ssl_cli` is only used by the **ssl** and **ssl-repository** profiles. Every other project uses the **generic** profile.
+
+**My project uses ssl_cli's older Repository pattern — will it work?** Yes, since v2.3.0: it's detected and gets the **ssl-repository** profile (rules for `lib/modules`, gate checks, `/migrate`). Before v2.3.0 such projects silently fell back to generic placeholder rules.
 
 **Will it work on my existing project?** Yes — that's what the generic profile and `/bootstrap` are for. The better your existing code is organised, the better the learned conventions. Always review `PROJECT_CONVENTIONS.md` before the first feature.
 

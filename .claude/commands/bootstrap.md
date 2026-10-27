@@ -5,6 +5,11 @@ Bootstrap this project for the AI-native pipeline. Read `.claude/ai-orchestratio
 
 ## 1. Conventions
 - **Profile `ssl`:** verify `ssl_cli help --all` and `autosafe --version`; report missing tools with install commands. Conventions are already in `.claude/rules/PROJECT_CONVENTIONS.md` — skip to step 2.
+- **Profile `ssl-repository`** (ssl_cli Repository / Bloc pattern, `lib/modules/…`): verify `ssl_cli help --all`. Then CHECK the rules against the code — do not change any code:
+  1. Read `lib/data_provider/api_client.dart`, `lib/global/widget/`, `lib/utils/navigation.dart`, and 2–3 modules end to end (`views/` → `controller/` or `bloc/` → `repository/` → `*_api.dart`), plus existing tests.
+  2. Write `.claude/rules/PROJECT_NOTES.md` with everything that differs from `PROJECT_CONVENTIONS.md`: the state management actually used in controllers (plain class, Riverpod `StateNotifier`/`Notifier`, Provider, GetX…), DI, secure storage vs `PrefHelper`, extra folders, renamed widgets, security/native code locations, anything the template doesn't mention. Use real paths and short snippets.
+  3. If `.claude/rules/STATE_MANAGEMENT.md` contains `ai-orch:unlearned`, document the real controller/state pattern there and remove the marker.
+  4. **STOP** and show me PROJECT_NOTES.md. Mention that `/migrate` exists if I want to move to Clean Architecture.
 - **Profile `generic`:** if `.claude/rules/PROJECT_CONVENTIONS.md` contains `ai-orch:unlearned`, LEARN the conventions:
   1. Read `pubspec.yaml`, `analysis_options.yaml`, `lib/main.dart`, the folder tree of `lib/` (2–3 levels), and 2–3 representative features end to end (API → state → UI), plus 2–3 existing tests.
   2. Rewrite `PROJECT_CONVENTIONS.md` using exactly the sections listed in it. Use real paths and short real snippets from this repo; mark anything inconsistent in the codebase as "Mixed — prefer X (newer code)". Remove the `ai-orch:unlearned` line.

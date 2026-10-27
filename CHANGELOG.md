@@ -2,6 +2,15 @@
 
 Update an installed project: `bash .claude/scripts/update.sh` (v2.2.2+) — or see README → Updating.
 
+## v2.3.0
+- **New `ssl-repository` profile** for existing projects created with ssl_cli's Repository (2) or Bloc (3) pattern (`lib/modules/<m>/controller|repository|views`). Previously these got generic placeholder rules and nothing project-specific.
+  - Auto-detected (`lib/modules/*/repository/*_interface.dart`, or `global_text.dart` + `api_client.dart`); choosing **1** routes there
+  - Managed `PROJECT_CONVENTIONS.md` for the Repository pattern; gate bans raw `Text(`/`AppBar(`…, `Color(0x`, `Image.asset(`, `showSnackBar(`, `print(` in `lib/modules`; tests required for controllers/repositories/blocs
+  - State: `bloc` when `flutter_bloc` is used, otherwise `custom` (learned by `/bootstrap`)
+  - `/bootstrap` verifies the rules against the code and writes `.claude/rules/PROJECT_NOTES.md`
+  - **`/migrate`** — resumable module-by-module migration to Clean Architecture; target rules shipped in `.claude/migration/target/`
+- Profiles can ship their own slash commands (`profiles/<p>/commands/`)
+
 ## v2.2.4
 - Subagent audit trail: every `test-writer` / `reviewer` (or other subagent) run is logged as `SUBAGENT_START <type> | <task>` and `SUBAGENT_STOP` in `.claude/audit.log` — check with `grep SUBAGENT .claude/audit.log`
 

@@ -215,6 +215,7 @@ curl -fsSL https://raw.githubusercontent.com/AscEmon/flutter-ai-orchestration/v2
 curl -fsSL https://raw.githubusercontent.com/AscEmon/flutter-ai-orchestration/v2.3.0/get.sh | AI_ORCH_STATE=bloc bash                        # force state: riverpod | bloc | custom
 curl -fsSL https://raw.githubusercontent.com/AscEmon/flutter-ai-orchestration/v2.3.0/get.sh | AI_ORCH_PROFILE=generic bash                   # force profile: ssl | ssl-repository | generic
 curl -fsSL https://raw.githubusercontent.com/AscEmon/flutter-ai-orchestration/v2.3.0/get.sh | bash -s -- --profile=generic --state=riverpod  # same, flag form (note the -s --)
+curl -fsSL https://raw.githubusercontent.com/AscEmon/flutter-ai-orchestration/v2.3.0/get.sh | AI_ORCH_PROFILE=ssl-repository bash -s -- --force
 ```
 
 > ⚠ **`bash: --state=riverpod: invalid option`?** Options after `| bash` need `-s --` first. Easier: use the `AI_ORCH_*` variables, or just `| bash` and answer the prompt.
